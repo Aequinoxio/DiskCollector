@@ -9,6 +9,7 @@ import diskcollector.NodeTypes.NodeInformation;
 import diskcollector.NodeTypes.NodeType;
 import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.BackupNodeInformation;
+import diskcollector.NodeTypes.EmptyNodeInformation;
 import java.awt.Cursor;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +38,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -240,10 +242,10 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewSubTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewSubTreeActionPerformed
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
 
         //Nessuna selezione o selezionato un nodo che non è un backup set
-        if (node == null || ((NodeInformation) node.getUserObject()).getType() != NodeType.BACKUP) {
+        if (selectedNode == null || ((NodeInformation) selectedNode.getUserObject()).getType() != NodeType.BACKUP) {
             JOptionPane.showMessageDialog(this, "Selezionare un nodo Backup", "Informazione", JOptionPane.WARNING_MESSAGE);
 
             return;
@@ -286,23 +288,14 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }//GEN-LAST:event_btnNewSubTreeActionPerformed
 
     private void btnNewSubTreeActionPerformedSwingWorker(java.awt.event.ActionEvent evt) throws InterruptedException, ExecutionException {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
 
         //Nessuna selezione o selezionato un nodo che non è un backup set
-        if (node == null || ((NodeInformation) node.getUserObject()).getType() != NodeType.BACKUP) {
+        if (selectedNode == null || ((NodeInformation) selectedNode.getUserObject()).getType() != NodeType.BACKUP) {
             JOptionPane.showMessageDialog(this, "Selezionare un nodo Backup", "Informazione", JOptionPane.WARNING_MESSAGE);
-
             return;
         }
 
-//        int val = JOptionPane.showConfirmDialog(
-//                this,
-//                "Inserisco il sottoramo nel punto scelto?",
-//                "Conferma",
-//                JOptionPane.YES_NO_OPTION);
-//        if (val != JOptionPane.YES_OPTION) {
-//            return;
-//        }
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new java.io.File("."));
         chooser.setDialogTitle("Directory da leggere");
@@ -312,38 +305,37 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         //
         chooser.setAcceptAllFileFilterUsed(false);
         //    
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-            DefaultTreeModel defaultTreeModel = (DefaultTreeModel) directoryTree.getModel();
-            DefaultMutableTreeNode topNode
-                    = m_selectedNode == null ? (DefaultMutableTreeNode) defaultTreeModel.getRoot() : m_selectedNode;
-
-//            SwingWorker swingWorker= new SwingWorker<DefaultMutableTreeNode,String>() {
-//                @Override
-//                protected DefaultMutableTreeNode doInBackground() throws Exception {
-//                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//                }
-//            };
-            this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-            FolderTreeReaderWorker folderTreeReaderWorker = new FolderTreeReaderWorker(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNode);
-            DlgSwingWorkerLog dlgSwingWorkerLog = new DlgSwingWorkerLog(this, true, folderTreeReaderWorker);
-            dlgSwingWorkerLog.startWorkerAndShow();
-            //folderTreeReaderWorker.execute();
-            if (folderTreeReaderWorker.isDone()&& !folderTreeReaderWorker.isCancelled()) {
-                topNode = folderTreeReaderWorker.get();
-            }
-            folderTreeReaderWorker.sortTree(topNode);
-            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//            FolderTreeReader.readDirectory(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNode);
-//            FolderTreeReader.sortTree(topNode);
-
-            ((DefaultTreeModel) directoryTree.getModel()).reload();
-            m_searchingNodes = null;
-
-        } else {
-            // System.out.println("No Selection ");
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
         }
 
+        DefaultTreeModel defaultTreeModel = (DefaultTreeModel) directoryTree.getModel();
+        DefaultMutableTreeNode topNode
+                = (m_selectedNode == null) ? (DefaultMutableTreeNode) defaultTreeModel.getRoot() : m_selectedNode;
+
+        DefaultMutableTreeNode topNodeTemp = new DefaultMutableTreeNode(new EmptyNodeInformation()); // Nodo temporaneo
+
+        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+        FolderTreeReaderWorker folderTreeReaderWorker = new FolderTreeReaderWorker(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNodeTemp);
+        DlgSwingWorkerLog dlgSwingWorkerLog = new DlgSwingWorkerLog(this, true, folderTreeReaderWorker);
+
+        dlgSwingWorkerLog.startWorkerAndShowDialog();
+
+        if (folderTreeReaderWorker.isDone() && !folderTreeReaderWorker.isCancelled()) {
+            topNode = (DefaultMutableTreeNode) folderTreeReaderWorker.get().getChildAt(0); // Carico tutti i sottonodi dell'albero creato con il placeholder 
+            // Oppure
+            //topNode.add((MutableTreeNode) topNodeTemp.getFirstChild());
+            folderTreeReaderWorker.sortTree(topNode);
+            selectedNode.add(topNode);
+        } else {
+            topNodeTemp.removeAllChildren(); // Per sicurezza e liberare memoria cancello tutti i figli se ho avuto problemi
+        }
+
+        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//            FolderTreeReader.readDirectory(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNode);
+//            FolderTreeReader.sortTree(topNode);
+        ((DefaultTreeModel) directoryTree.getModel()).reload();
+        m_searchingNodes = null;
     }
 
     private void btnUpdateNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateNodeTreeActionPerformed
@@ -577,7 +569,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
                 case GENERIC: {
                     sb.append(nodeInfo.toString()).append("\n");
-                    System.out.println("");
+                    //System.out.println("");
                 }
                 break;
 

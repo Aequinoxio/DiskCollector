@@ -6,29 +6,60 @@
 package diskcollector;
 
 import java.awt.Cursor;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
  *
  * @author utente
  */
-public class DlgSwingWorkerLog extends javax.swing.JDialog {
+public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCallBack {
 
     FolderTreeReaderWorker folderTreeReaderWorker;
 
     /**
      * Creates new form dlgSwingWorkerLog
+     *
+     * @param parent
+     * @param modal
+     * @param folderTreeReaderWorker
      */
-    public DlgSwingWorkerLog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
-        initComponents();
-    }
-
+//    public DlgSwingWorkerLog(java.awt.Frame parent, boolean modal) {
+//        super(parent, modal);
+//        initComponents();
+//    }
     public DlgSwingWorkerLog(java.awt.Frame parent, boolean modal, FolderTreeReaderWorker folderTreeReaderWorker) {
         super(parent, modal);
-        this.folderTreeReaderWorker = folderTreeReaderWorker;
         initComponents();
+        this.folderTreeReaderWorker = folderTreeReaderWorker;
         this.folderTreeReaderWorker.setTextAreaLog(txtLogWorker);
+        setLocationRelativeTo(parent);
+        //folderTreeReaderWorker.setWorkerCallBack(this); // TODO: provare ad utilizzare i listeners
+
+        folderTreeReaderWorker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent event) {
+//                // DEBUG
+//                String str  ="dialog worker";
+//                if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.DONE == event.getNewValue()) {
+//                    System.out.println("Thread Status with Name :" + str + ", SwingWorker Status is " + event.getNewValue());
+//                } else if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.PENDING == event.getNewValue()) {
+//                    System.out.println("Thread Status with Mame :" + str + ", SwingWorker Status is " + event.getNewValue());
+//                } else if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.STARTED == event.getNewValue()) {
+//                    System.out.println("Thread Status with Name :" + str + ", SwingWorker Status is " + event.getNewValue());
+//                } else {
+//                    System.out.println("SomeThing Wrong happends with Thread Status with Name :" + str);
+//                }
+//                // DEBUG
+
+                // Se ho terminato il task aggiorno la UI
+                if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.DONE.equals(event.getNewValue())) {
+                    btnStopWorker.setText("Chiudi"); // TODO: da gestire il pulsante chiudi. Forse ne vanno sovrapposti 2          
+                }
+            }
+        });
     }
 
     /**
@@ -96,60 +127,65 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog {
 
     private void btnStopWorkerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopWorkerActionPerformed
         if (folderTreeReaderWorker.isCancelled() || folderTreeReaderWorker.isDone()) {
-            this.setVisible(false);            
+            this.setVisible(false);
         } else {
-            folderTreeReaderWorker.cancel(true);
-            btnStopWorker.setText("Chiudi");
+
+            int val = JOptionPane.showConfirmDialog(this, "Annullo il caricamento?", "Conferma", JOptionPane.YES_NO_OPTION);
+            if (val == JOptionPane.OK_OPTION) {
+                folderTreeReaderWorker.cancel(true);
+                btnStopWorker.setText("Chiudi"); // TODO: da gestire il pulsante chiudi. Forse ne vanno sovrapposti 2          
+            }
         }
     }//GEN-LAST:event_btnStopWorkerActionPerformed
 
-    public void startWorkerAndShow() {
-        folderTreeReaderWorker.execute();        
+    public void startWorkerAndShowDialog() {
+        folderTreeReaderWorker.execute();
         this.setVisible(true);
+//        btnStopWorker.setText("Chiudi");
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                DlgSwingWorkerLog dialog = new DlgSwingWorkerLog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+//    /**
+//     * @param args the command line arguments
+//     */
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(DlgSwingWorkerLog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//        //</editor-fold>
+//
+//        /* Create and display the dialog */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                DlgSwingWorkerLog dialog = new DlgSwingWorkerLog(new javax.swing.JFrame(), true);
+//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+//                    @Override
+//                    public void windowClosing(java.awt.event.WindowEvent e) {
+//                        System.exit(0);
+//                    }
+//                });
+//                dialog.setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnStopWorker;
@@ -158,4 +194,9 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea txtLogWorker;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void executeJob() {
+        btnStopWorker.setText("Chiudi");
+    }
 }

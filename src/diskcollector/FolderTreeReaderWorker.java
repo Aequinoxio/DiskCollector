@@ -39,12 +39,18 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     DefaultMutableTreeNode topNodeCancelledThread;
     JTextArea txtLogArea;
     FolderTreeReaderWorker mySelf = this;
+    // WorkerCallBack workerCallBack;
 
     public FolderTreeReaderWorker(Path path, DefaultMutableTreeNode topNode) {
         this.path = path;
         this.topNode = topNode;
         this.topNodeCancelledThread = topNode; // TODO: da modificare, così crea un riferimento che ritorna comunque un nodo aggiornato
+        
     }
+
+//    public void setWorkerCallBack(WorkerCallBack workerCallBack) {
+//        this.workerCallBack = workerCallBack;
+//    }
 
     private DefaultMutableTreeNode readDirectory(Path path, DefaultMutableTreeNode topNode) {
 
@@ -78,7 +84,9 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                 public FileVisitResult visitFileFailed(Path file, IOException exc) {
                     // Skip folders that can't be traversed
 
-                    System.out.println("skipped: " + file + " (" + exc + ")");
+                    //System.out.println("skipped: " + file + " (" + exc + ")");
+                    
+                    publish(" --- Skipped: " + file + " (" + exc + ")");
 
                     DefaultMutableTreeNode TEMP = new DefaultMutableTreeNode(new NodeInformation(file.getFileName() + " -- Skipped --"));
                     // Se è una directory creo un nodo fittizio che rappresenta la folder non acceduta
@@ -93,7 +101,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
 
                     if (exc != null) {
-                        System.out.println("had trouble traversing: " + dir + " (" + exc + ")");
+                        publish(" --- Problemi ad attraversare: " + dir + " (" + exc + ")");                        
                     } else {
                         if (directoryTemp.getDepth() == 0) {
                             //directoryTemp.add(new DefaultMutableTreeNode(new EmptyNodeInformation())); // TODO: Verificare se va bene
@@ -106,7 +114,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     directoryStack.pop();  // Se esco dalla subdir la rimuovo dallo stack diquelle da visitare
                     // Ignore errors traversing a folder
 
-                    System.out.println(dir.toString());
+                    //System.out.println(dir.toString());
                     publish(dir.toString());
                     return FileVisitResult.CONTINUE;
                 }
@@ -205,16 +213,20 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     @Override
     protected void process(List<String> chunks) {
         for (String fileProcessed : chunks) {
-            txtLogArea.append(fileProcessed + "\n");
+            txtLogArea.append(fileProcessed );
 //            System.out.println(fileProcessed);
         }
 
-        System.out.println(chunks.size());
+        txtLogArea.append(" ("+chunks.size()+") files\n");
     }
 
     @Override
     protected void done() {
         super.done(); //To change body of generated methods, choose Tools | Templates.
+        // Viene lanciato un PropertyChangeEvent con valore SwingWorker.StateValue.DONE
+        
+//      Se uso un property change listener non serve questa chiamata
+//        workerCallBack.executeJob(); // Chiamo questa callback prima di finire. Dovrei essere nell'EDT (DA VERIFICARE -> SI)
 
     }
 
