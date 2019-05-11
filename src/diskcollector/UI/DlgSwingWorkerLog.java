@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package diskcollector;
+package diskcollector.UI;
 
-import java.awt.Cursor;
+import diskcollector.FolderTreeReaderWorker;
+import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JOptionPane;
@@ -15,7 +16,7 @@ import javax.swing.SwingWorker;
  *
  * @author utente
  */
-public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCallBack {
+public class DlgSwingWorkerLog extends javax.swing.JDialog {
 
     FolderTreeReaderWorker folderTreeReaderWorker;
 
@@ -57,6 +58,8 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
                 // Se ho terminato il task aggiorno la UI
                 if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.DONE.equals(event.getNewValue())) {
                     btnStopWorker.setText("Chiudi"); // TODO: da gestire il pulsante chiudi. Forse ne vanno sovrapposti 2          
+                    btnStopWorker.requestFocus();
+                    btnStopWorker.setBackground(Color.green);
                 }
             }
         });
@@ -80,7 +83,9 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
         jButton1.setText("jButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Creazione sottorami");
 
+        btnStopWorker.setBackground(new java.awt.Color(255, 51, 51));
         btnStopWorker.setText("Ferma");
         btnStopWorker.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -90,6 +95,7 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
 
         jLabel1.setText("Attività");
 
+        txtLogWorker.setEditable(false);
         txtLogWorker.setColumns(20);
         txtLogWorker.setRows(5);
         jScrollPane1.setViewportView(txtLogWorker);
@@ -101,7 +107,7 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 832, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -116,7 +122,7 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(btnStopWorker)
                 .addContainerGap())
@@ -133,7 +139,7 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
             int val = JOptionPane.showConfirmDialog(this, "Annullo il caricamento?", "Conferma", JOptionPane.YES_NO_OPTION);
             if (val == JOptionPane.OK_OPTION) {
                 folderTreeReaderWorker.cancel(true);
-                btnStopWorker.setText("Chiudi"); // TODO: da gestire il pulsante chiudi. Forse ne vanno sovrapposti 2          
+                btnStopWorker.setText("Chiudi");                 
             }
         }
     }//GEN-LAST:event_btnStopWorkerActionPerformed
@@ -195,8 +201,4 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog implements WorkerCall
     private javax.swing.JTextArea txtLogWorker;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void executeJob() {
-        btnStopWorker.setText("Chiudi");
-    }
 }

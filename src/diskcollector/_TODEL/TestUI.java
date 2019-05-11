@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package diskcollector.TestUI_TODEL;
+package diskcollector._TODEL;
 
-import diskcollector.DlgSwingWorkerLog;
+import diskcollector.UI.DlgSwingWorkerLog;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;

@@ -8,23 +8,33 @@ package diskcollector.NodeTypes;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.Date;
 
 /**
  *
  * @author utente
  */
-public class FolderNodeInformation extends NodeInformation {
+public class FolderNodeInformation extends FilesystemNodeInformation {
 
     // Informazioni nel caso in cui l'oggetto del tree sia un folder
-    private String path;              // 
-    private Date lastModifiedDateTime = null;
-    private Date lastAccessedDateTime = null;
-    private Date createDateTime = null;
+//    private String path;              // 
+//    private long lastModifiedDateTime;
+//    private long lastAccessedDateTime;
+//    private long createDateTime;
     private long sizeTotal ;
-    private long subfolders;
+    private long subFolders;
     private long filesInFolder;
-    private long filesTotal;
+    private long filesSizeInFolder;
+
+    public long getFilesSizeInFolder() {
+        return filesSizeInFolder;
+    }
+
+    public void setFilesSizeInFolder(long filesSizeInFolder) {
+        this.filesSizeInFolder = filesSizeInFolder;
+    }
+    private long filesTotal;        // Numero di files totali nella subfolder
     //public static final NodeType type = NodeType.FILE;
 
 
@@ -38,13 +48,13 @@ public class FolderNodeInformation extends NodeInformation {
     }
 
     public FolderNodeInformation(Path path) {
-        super(path.getFileName() == null ? path.getRoot().toString():path.getFileName().toString(), NodeType.FOLDER);
-        this.path = path.toString();
+        super(path, NodeType.FOLDER);
+        //this.path = path.toString();
     }
 
     public FolderNodeInformation(String string, Path path) {
         super(string, NodeType.FOLDER);
-        this.path = path.toString();
+        //this.path = path.toString();
     }
 
 ////    public FolderNodeInformation(String displayString, NodeType type) {
@@ -65,43 +75,44 @@ public class FolderNodeInformation extends NodeInformation {
 //        super(type);
 //    }
 
-    public Path getPath() {
-        return Paths.get(path);
+//    public Path getPath() {
+//        return Paths.get(path);
+//    }
+//
+//    public void setPath(Path path) {
+//        this.path = path.toString();
+//    }
+//
+//    public long getLastModifiedDateTime() {
+//        return lastModifiedDateTime;
+//    }
+//
+//    public void setLastModifiedDateTime(long lastModifiedDateTime) {
+//        this.lastModifiedDateTime = lastModifiedDateTime;
+//    }
+//
+//    public long getLastAccessedDateTime() {
+//        return lastAccessedDateTime;
+//    }
+//
+//    public void setLastAccessedDateTime(long lastAccessedDateTime) {
+//        this.lastAccessedDateTime = lastAccessedDateTime;
+//    }
+//
+//    public long getCreateDateTime() {
+//        return createDateTime;
+//    }
+//
+//    public void setCreateDateTime(long createDateTime) {
+//        this.createDateTime = createDateTime;
+//    }
+
+    public long getSubFolders() {
+        return subFolders;
     }
 
-    public void setPath(Path path) {
-        this.path = path.toString();
-    }
-
-    public Date getLastModifiedDateTime() {
-        return lastModifiedDateTime;
-    }
-
-    public void setLastModifiedDateTime(Date lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
-    }
-
-    public Date getLastAccessedDateTime() {
-        return lastAccessedDateTime;
-    }
-
-    public void setLastAccessedDateTime(Date lastAccessedDateTime) {
-        this.lastAccessedDateTime = lastAccessedDateTime;
-    }
-
-    public Date getCreateDateTime() {
-        return createDateTime;
-    }
-
-    public void setCreateDateTime(Date createDateTime) {
-        this.createDateTime = createDateTime;
-    }
-    public long getSubfolders() {
-        return subfolders;
-    }
-
-    public void setSubfolders(long subfolders) {
-        this.subfolders = subfolders;
+    public void setSubFolders(long subFolders) {
+        this.subFolders = subFolders;
     }
 
     public long getFilesInFolder() {
