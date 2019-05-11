@@ -10,10 +10,34 @@ package diskcollector.NodeTypes;
  * @author utente
  */
 public enum NodeType {
+
+    /**
+     *
+     */
     ROOT,
+
+    /**
+     *
+     */
     BACKUP,
+
+    /**
+     *
+     */
     FILE,
+
+    /**
+     *
+     */
     FOLDER,
+
+    /**
+     *
+     */
     GENERIC,
+
+    /**
+     *
+     */
     EMPTY_PLACEHOLDER;
 }

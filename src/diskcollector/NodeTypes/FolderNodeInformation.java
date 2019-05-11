@@ -5,11 +5,7 @@
  */
 package diskcollector.NodeTypes;
 
-import java.io.Serializable;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
-import java.util.Date;
 
 /**
  *
@@ -27,13 +23,6 @@ public class FolderNodeInformation extends FilesystemNodeInformation {
     private long filesInFolder;
     private long filesSizeInFolder;
 
-    public long getFilesSizeInFolder() {
-        return filesSizeInFolder;
-    }
-
-    public void setFilesSizeInFolder(long filesSizeInFolder) {
-        this.filesSizeInFolder = filesSizeInFolder;
-    }
     private long filesTotal;        // Numero di files totali nella subfolder
     //public static final NodeType type = NodeType.FILE;
 
@@ -47,14 +36,39 @@ public class FolderNodeInformation extends FilesystemNodeInformation {
         super(toString, NodeType.FOLDER);
     }
 
+    /**
+     *
+     * @param path
+     */
     public FolderNodeInformation(Path path) {
         super(path, NodeType.FOLDER);
         //this.path = path.toString();
     }
 
+    /**
+     *
+     * @param string
+     * @param path
+     */
     public FolderNodeInformation(String string, Path path) {
         super(string, NodeType.FOLDER);
         //this.path = path.toString();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public long getFilesSizeInFolder() {
+        return filesSizeInFolder;
+    }
+
+    /**
+     *
+     * @param filesSizeInFolder
+     */
+    public void setFilesSizeInFolder(long filesSizeInFolder) {
+        this.filesSizeInFolder = filesSizeInFolder;
     }
 
 ////    public FolderNodeInformation(String displayString, NodeType type) {
@@ -107,34 +121,67 @@ public class FolderNodeInformation extends FilesystemNodeInformation {
 //        this.createDateTime = createDateTime;
 //    }
 
+    /**
+     *
+     * @return
+     */
+
     public long getSubFolders() {
         return subFolders;
     }
 
+    /**
+     *
+     * @param subFolders
+     */
     public void setSubFolders(long subFolders) {
         this.subFolders = subFolders;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getFilesInFolder() {
         return filesInFolder;
     }
 
+    /**
+     *
+     * @param filesInFolder
+     */
     public void setFilesInFolder(long filesInFolder) {
         this.filesInFolder = filesInFolder;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getFilesTotal() {
         return filesTotal;
     }
 
+    /**
+     *
+     * @param filesTotal
+     */
     public void setFilesTotal(long filesTotal) {
         this.filesTotal = filesTotal;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getSizeTotal() {
         return sizeTotal;
     }
 
+    /**
+     *
+     * @param sizeTotal
+     */
     public void setSizeTotal(long sizeTotal) {
         this.sizeTotal = sizeTotal;
     }

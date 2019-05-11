@@ -11,10 +11,17 @@ package diskcollector.NodeTypes;
  */
 public class EmptyNodeInformation extends NodeInformation{
 
+    /**
+     *
+     */
     public EmptyNodeInformation() {
         super("-- VUOTO --",NodeType.EMPTY_PLACEHOLDER); // TODO: cercare una stringa migliore
     }
 
+    /**
+     *
+     * @param displayString
+     */
     public EmptyNodeInformation(String displayString) {
         super(displayString,NodeType.EMPTY_PLACEHOLDER);
     }

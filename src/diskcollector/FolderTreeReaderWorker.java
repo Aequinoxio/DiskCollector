@@ -5,9 +5,9 @@
  */
 package diskcollector;
 
-import diskcollector.NodeTypes.NodeInformation;
 import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.FolderNodeInformation;
+import diskcollector.NodeTypes.NodeInformation;
 import diskcollector.NodeTypes.NodeType;
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +16,9 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Stack;
@@ -43,7 +41,27 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     JTextArea txtLogArea;
     FolderTreeReaderWorker mySelf = this;
     // WorkerCallBack workerCallBack;
+    private final Comparator< DefaultMutableTreeNode> tnc = new Comparator< DefaultMutableTreeNode>() {
+        @Override
+        public int compare(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
+            //Sort the parent and child nodes separately:
+            if (a.isLeaf() && !b.isLeaf()) {
+                return 1;
+            } else if (!a.isLeaf() && b.isLeaf()) {
+                return -1;
+            } else {
+                String sa = a.getUserObject().toString();
+                String sb = b.getUserObject().toString();
+                return sa.compareToIgnoreCase(sb);
+            }
+        }
+    };
 
+    /**
+     *
+     * @param path
+     * @param topNode
+     */
     public FolderTreeReaderWorker(Path path, DefaultMutableTreeNode topNode) {
         this.path = path;
         this.topNode = topNode;
@@ -67,16 +85,12 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
-                    if (FolderTreeReaderWorker.this.isCancelled()) {
-                        // System.out.println("CANCELLATO");
+                    if (FolderTreeReaderWorker.this.isCancelled()) {                        
                         return FileVisitResult.TERMINATE;
                     }
 
                     //directoryTemp.add(new DefaultMutableTreeNode(file.getFileName().toString()));
                     FileNodeInformation fileNodeInformation = new FileNodeInformation(file);
-                    //fileNodeInformation.setPath(file);
-//                    fileNodeInformation.setLastModifiedDateTime(new Date(file.toFile().lastModified()));
-//                    fileNodeInformation.setCreateDateTime(new Date(file.toFile().lastModified()));
 
                     BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
 
@@ -129,8 +143,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     // Fa la stessa cosa di directoryTemp.getParent();
                     directoryStack.pop();  // Se esco dalla subdir la rimuovo dallo stack diquelle da visitare
                     // Ignore errors traversing a folder
-
-                    //System.out.println(dir.toString());
+                   
                     publish(dir.toString() + "\n");
                     
                     return FileVisitResult.CONTINUE;
@@ -142,8 +155,6 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     DefaultMutableTreeNode ultimoFiglio;                    
 
                     FolderNodeInformation foldernodeInformation = new FolderNodeInformation(folderPath);
-                    //filenodeInformation.setPath(t);
-                    //foldernodeInformation.setLastModifiedDateTime(new Date(t.toFile().lastModified()));
                     
                     BasicFileAttributes attr = Files.readAttributes(folderPath, BasicFileAttributes.class);
 
@@ -152,10 +163,8 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     foldernodeInformation.setLastAccessedDateTime(attr.lastAccessTime().toMillis());
 
 
-                    directoryTemp = new DefaultMutableTreeNode(foldernodeInformation);
-                    // if (albero.getDepth() == 0) {
-                    if (directoryStack.empty()) {
-                        //ultimoFiglio = (DefaultMutableTreeNode) albero.getRoot();
+                    directoryTemp = new DefaultMutableTreeNode(foldernodeInformation);                    
+                    if (directoryStack.empty()) {                        
                         ultimoFiglio = directoryTemp;
                         albero.add(ultimoFiglio);
                         directoryStack.push(ultimoFiglio);
@@ -224,46 +233,33 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
             if (!node.isLeaf()) {
-                sort3(node);   //selection sort
-                //sort3(node); //JDK 1.6.0: iterative merge sort
-                //sort3(node); //JDK 1.7.0: TimSort
+                sortNodes(node);   //selection sort
             }
         }
     }
 
-    private void sort3(DefaultMutableTreeNode parent) {
+    private void sortNodes(DefaultMutableTreeNode parent) {
         int n = parent.getChildCount();
-        //@SuppressWarnings("unchecked")
-        //Enumeration< DefaultMutableTreeNode> e = parent.children();
-        //ArrayList< DefaultMutableTreeNode> children = Collections.list(e);
+
         List< DefaultMutableTreeNode> children = new ArrayList< DefaultMutableTreeNode>(n);
         for (int i = 0; i < n; i++) {
             children.add((DefaultMutableTreeNode) parent.getChildAt(i));
         }
         Collections.sort(children, tnc); //iterative merge sort
         parent.removeAllChildren();
-        for (MutableTreeNode node : children) {
+        children.forEach((node) -> {
             parent.add(node);
-        }
+        });
     }
 
-    private Comparator< DefaultMutableTreeNode> tnc = new Comparator< DefaultMutableTreeNode>() {
-        @Override
-        public int compare(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
-            //Sort the parent and child nodes separately:
-            if (a.isLeaf() && !b.isLeaf()) {
-                return 1;
-            } else if (!a.isLeaf() && b.isLeaf()) {
-                return -1;
-            } else {
-                String sa = a.getUserObject().toString();
-                String sb = b.getUserObject().toString();
-                return sa.compareToIgnoreCase(sb);
-            }
-        }
-    };
 
     /////////// SWING WORKER METHODS ///////////
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     @Override
     protected DefaultMutableTreeNode doInBackground() throws Exception {
         readDirectory(path, topNode);
@@ -274,25 +270,31 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
         }
     }
 
+    /**
+     *
+     * @param chunks
+     */
     @Override
     protected void process(List<String> chunks) {
-        for (String fileProcessed : chunks) {
+        chunks.forEach((fileProcessed) -> {
             txtLogArea.append(fileProcessed);
-//            System.out.println(fileProcessed);
-        }
-
-        //txtLogArea.append(" ("+chunks.size()+") files\n");
+        });        
     }
 
+    /**
+     *
+     */
     @Override
     protected void done() {
-        super.done(); //To change body of generated methods, choose Tools | Templates.
+        super.done(); 
         // Viene lanciato un PropertyChangeEvent con valore SwingWorker.StateValue.DONE
-
-//      Se uso un property change listener non serve questa chiamata
-//        workerCallBack.executeJob(); // Chiamo questa callback prima di finire. Dovrei essere nell'EDT (DA VERIFICARE -> SI)
+        // Gestisco la UI nel relativo listener della dialog parent 
     }
 
+    /**
+     *
+     * @param area
+     */
     public void setTextAreaLog(JTextArea area) {
         this.txtLogArea = area;
     }

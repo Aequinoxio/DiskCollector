@@ -6,9 +6,6 @@
 package diskcollector.NodeTypes;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
-import java.util.Date;
 
 /**
  *
@@ -32,11 +29,20 @@ public class FileNodeInformation extends FilesystemNodeInformation {
         super(toString, NodeType.FILE);
     }
 
+    /**
+     *
+     * @param path
+     */
     public FileNodeInformation(Path path) {
         super(path, NodeType.FILE);
         //this.path = path.toString();
     }
 
+    /**
+     *
+     * @param string
+     * @param path
+     */
     public FileNodeInformation(String string, Path path) {
         super(string, path, NodeType.FILE);
         //this.path = path.toString();
@@ -92,10 +98,19 @@ public class FileNodeInformation extends FilesystemNodeInformation {
 //        this.createDateTime = createDateTime;
 //    }
 
+    /**
+     *
+     * @return
+     */
+
     public long getSize() {
         return size;
     }
 
+    /**
+     *
+     * @param size
+     */
     public void setSize(long size) {
         this.size = size;
     }

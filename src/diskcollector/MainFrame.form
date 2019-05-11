@@ -9,6 +9,29 @@
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuLoadDB">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Salva tutto il DB"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLoadDBActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Carica DB"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="mnu2About">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="About"/>
+          </Properties>
+          <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mitmAbout">
               <Properties>
                 <Property name="text" type="java.lang.String" value="About"/>
@@ -60,9 +83,9 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnDeleteNodeTre" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnInsertNodeTree" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
-                      <Component id="btnUpdateNodeTree" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnDeleteNodeTree" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="159" max="32767" attributes="0"/>
                       <Component id="btnSaveTree" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -85,13 +108,13 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="btnUpdateNodeTree" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnDeleteNodeTree" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnDeleteNodeTre" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnViewLog" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnSaveTree" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnLoadTree" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnNewBackup" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnInsertNodeTree" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -106,12 +129,12 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JButton" name="btnUpdateNodeTree">
+    <Component class="javax.swing.JButton" name="btnDeleteNodeTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cancella ramo"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateNodeTreeActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDeleteNodeTreeActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnDeleteNodeTre">
@@ -125,7 +148,11 @@
     <Component class="javax.swing.JTextField" name="txtSearchText">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cerca"/>
+        <Property name="toolTipText" type="java.lang.String" value="Usa una regexp per cercare nel DB"/>
       </Properties>
+      <Events>
+        <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtSearchTextFocusGained"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnSearch">
       <Properties>
@@ -200,6 +227,7 @@
               <Properties>
                 <Property name="editable" type="boolean" value="false"/>
                 <Property name="columns" type="int" value="20"/>
+                <Property name="lineWrap" type="boolean" value="true"/>
                 <Property name="rows" type="int" value="5"/>
               </Properties>
             </Component>
@@ -231,12 +259,12 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNewBackupActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="btnInsertNodeTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Inserisci ramo"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInsertNodeTreeActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

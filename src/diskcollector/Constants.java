@@ -19,33 +19,56 @@ public class Constants {
     private static final String SAVED_FILENAME = "SAVED_FILENAME";
     private static final Preferences prefs = Preferences.userNodeForPackage(Constants.class);
 
+    /**
+     *
+     * @return
+     */
+    public static Constants getInstance() {
+        return ConstantsHolder.INSTANCE;
+    }
+
 
     private Constants() {
     }
 
-    public static Constants getInstance() {
-        return ConstantsHolder.INSTANCE;
+    /**
+     *
+     * @return
+     */
+    public String getLatestSavePath() {
+        return prefs.get(SAVED_PATH, ".");
+    }
+
+    /**
+     *
+     * @param savePath
+     */
+    public void setLatestSavePath(String savePath) {
+        prefs.put(SAVED_PATH, savePath);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getLatestSaveFilename() {
+        return prefs.get(SAVED_FILENAME, "DB.txt");
+    }
+
+    /**
+     *
+     * @param saveFilename
+     */
+    public void setLatestSaveFilename(String saveFilename) {
+        prefs.put(SAVED_FILENAME, saveFilename);
     }
 
     private static class ConstantsHolder {
 
         private static final Constants INSTANCE = new Constants();
-    }
 
-    public String getLatestSavePath() {
-        return prefs.get(SAVED_PATH, ".");
-    }
-
-    public void setLatestSavePath(String savePath) {
-        prefs.put(SAVED_PATH, savePath);
-    }
-
-    public String getLatestSaveFilename() {
-        return prefs.get(SAVED_FILENAME, "DB.txt");
-    }
-
-    public void setLatestSaveFilename(String saveFilename) {
-        prefs.put(SAVED_FILENAME, saveFilename);
+        private ConstantsHolder() {
+        }
     }
 
 }

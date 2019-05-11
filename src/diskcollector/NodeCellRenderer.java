@@ -30,6 +30,9 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     private final ImageIcon folderIconClose;
     private final ImageIcon folderIconOpen;
 
+    /**
+     *
+     */
     public NodeCellRenderer() {
         mainIcon = new ImageIcon(NodeCellRenderer.class.getResource("/images/Settings-Backup-Sync-icon_32.png"));
         backupTextIcon = new ImageIcon(NodeCellRenderer.class.getResource("/images/cd-burner-copy-icon_32.png"));
@@ -37,6 +40,17 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
         folderIconOpen = new ImageIcon(NodeCellRenderer.class.getResource("/images/folder-open-icon_24.png"));
     }
 
+    /**
+     *
+     * @param tree
+     * @param value
+     * @param sel
+     * @param expanded
+     * @param leaf
+     * @param row
+     * @param hasFocus
+     * @return
+     */
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
             boolean leaf, int row, boolean hasFocus) {

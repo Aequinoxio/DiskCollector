@@ -5,33 +5,27 @@
  */
 package diskcollector;
 
-import diskcollector.UI.DlgSwingWorkerLog;
-import diskcollector.NodeTypes.NodeInformation;
-import diskcollector.NodeTypes.NodeType;
-import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.BackupNodeInformation;
 import diskcollector.NodeTypes.EmptyNodeInformation;
+import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.FilesystemNodeInformation;
 import diskcollector.NodeTypes.FolderNodeInformation;
+import diskcollector.NodeTypes.NodeInformation;
+import diskcollector.NodeTypes.NodeType;
 import diskcollector.UI.DlgAbout;
+import diskcollector.UI.DlgSwingWorkerLog;
 import java.awt.Cursor;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -43,13 +37,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
-import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -61,8 +52,8 @@ import javax.swing.tree.TreePath;
 public class MainFrame extends javax.swing.JFrame implements TreeSelectionListener {
 
     DefaultMutableTreeNode m_selectedNode; // Nodo selezionato nel jtree
-    private Enumeration m_searchingNodes; // Enumeration per la ricerca, viene messo a null ogni volta che c'è una modifica sui dati dell'albero
-    private String latestDBSaveParh = "";
+    private Enumeration m_searchingNodes;  // Enumeration per la ricerca, viene messo a null ogni volta che c'è una modifica sui dati dell'albero
+    private final String latestDBSaveParh = "";
 
     /**
      * Creates new form MainFrame
@@ -96,7 +87,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnUpdateNodeTree = new javax.swing.JButton();
+        btnDeleteNodeTree = new javax.swing.JButton();
         btnDeleteNodeTre = new javax.swing.JButton();
         txtSearchText = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
@@ -109,19 +100,22 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         btnSaveTree = new javax.swing.JButton();
         btnLoadTree = new javax.swing.JButton();
         btnNewBackup = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnInsertNodeTree = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        mnuLoadDB = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        mnu2About = new javax.swing.JMenu();
         mitmAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(930, 730));
         setPreferredSize(new java.awt.Dimension(930, 800));
 
-        btnUpdateNodeTree.setText("Cancella ramo");
-        btnUpdateNodeTree.addActionListener(new java.awt.event.ActionListener() {
+        btnDeleteNodeTree.setText("Cancella ramo");
+        btnDeleteNodeTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateNodeTreeActionPerformed(evt);
+                btnDeleteNodeTreeActionPerformed(evt);
             }
         });
 
@@ -133,6 +127,12 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         txtSearchText.setText("Cerca");
+        txtSearchText.setToolTipText("Usa una regexp per cercare nel DB");
+        txtSearchText.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSearchTextFocusGained(evt);
+            }
+        });
 
         btnSearch.setText("Cerca");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -161,6 +161,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         txtDetails.setEditable(false);
         txtDetails.setColumns(20);
+        txtDetails.setLineWrap(true);
         txtDetails.setRows(5);
         jScrollPane2.setViewportView(txtDetails);
 
@@ -187,14 +188,34 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         });
 
-        jButton1.setText("Inserisci ramo");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnInsertNodeTree.setText("Inserisci ramo");
+        btnInsertNodeTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnInsertNodeTreeActionPerformed(evt);
             }
         });
 
         jMenu1.setText("File");
+
+        mnuLoadDB.setText("Salva tutto il DB");
+        mnuLoadDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuLoadDBActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mnuLoadDB);
+
+        jMenuItem2.setText("Carica DB");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
+
+        jMenuBar1.add(jMenu1);
+
+        mnu2About.setText("About");
 
         mitmAbout.setText("About");
         mitmAbout.addActionListener(new java.awt.event.ActionListener() {
@@ -202,9 +223,9 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 mitmAboutActionPerformed(evt);
             }
         });
-        jMenu1.add(mitmAbout);
+        mnu2About.add(mitmAbout);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(mnu2About);
 
         setJMenuBar(jMenuBar1);
 
@@ -221,9 +242,9 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDeleteNodeTre)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1)
+                        .addComponent(btnInsertNodeTree)
                         .addGap(24, 24, 24)
-                        .addComponent(btnUpdateNodeTree)
+                        .addComponent(btnDeleteNodeTree)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)
                         .addComponent(btnSaveTree)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -241,13 +262,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnUpdateNodeTree)
+                    .addComponent(btnDeleteNodeTree)
                     .addComponent(btnDeleteNodeTre)
                     .addComponent(btnViewLog)
                     .addComponent(btnSaveTree)
                     .addComponent(btnLoadTree)
                     .addComponent(btnNewBackup)
-                    .addComponent(jButton1))
+                    .addComponent(btnInsertNodeTree))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -260,7 +281,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnNewSubTreeActionPerformedSwingWorker(java.awt.event.ActionEvent evt) throws InterruptedException, ExecutionException {
+    private void insertSubTree() throws InterruptedException, ExecutionException {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
 
         //Nessuna selezione o selezionato un nodo che non è un backup set
@@ -305,18 +326,16 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         }
 
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//            FolderTreeReader.readDirectory(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNode);
-//            FolderTreeReader.sortTree(topNode);
         ((DefaultTreeModel) directoryTree.getModel()).reload();
         m_searchingNodes = null;
     }
 
-    private void btnUpdateNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateNodeTreeActionPerformed
-        // TODO add your handling code here:
+    private void btnDeleteNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteNodeTreeActionPerformed
+
         deleteSubTree();
 
         m_searchingNodes = null; // TODO: inserirlo dopo aver aggiornato il tree
-    }//GEN-LAST:event_btnUpdateNodeTreeActionPerformed
+    }//GEN-LAST:event_btnDeleteNodeTreeActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         DefaultMutableTreeNode node = searchNode(txtSearchText.getText());
@@ -338,28 +357,21 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }//GEN-LAST:event_btnSaveTreeActionPerformed
 
     private void btnLoadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTreeActionPerformed
-
-        openTheTree();
-
-        // ((DefaultTreeModel) directoryTree.getModel()).reload();
+        openTheTree();       
     }//GEN-LAST:event_btnLoadTreeActionPerformed
 
     private void btnViewLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewLogActionPerformed
-        ((DefaultMutableTreeNode) ((DefaultTreeModel) directoryTree.getModel()).getRoot()).removeAllChildren();
+        int val= JOptionPane.showConfirmDialog(this, "Conferma", "Cancello tutto?", JOptionPane.OK_CANCEL_OPTION);
+        if (val != JOptionPane.OK_OPTION){
+            return;                    
+        }
+        ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).removeAllChildren();
         ((DefaultTreeModel) directoryTree.getModel()).reload();
         m_searchingNodes = null;
     }//GEN-LAST:event_btnViewLogActionPerformed
 
     private void btnNewBackupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewBackupActionPerformed
 
-//        String s = (String) JOptionPane.showInputDialog(
-//                this,
-//                "Label per il backup tree da inserire\nTip: usa l'ID del disco la label e\nuna data in formato inverso",
-//                "Nuovo backup tree",
-//                JOptionPane.PLAIN_MESSAGE,
-//                null,
-//                null,
-//                "");
         // Personalizzo la dialog
         JTextField txtBackupSetName = new JTextField();
         JTextArea txtBackupSetDescription = new JTextArea(10, 50);
@@ -392,7 +404,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 nome, desc
         )));
 
-        //((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).add(defaultMutableTreeNode);
         ((DefaultTreeModel) directoryTree.getModel()).reload();
     }//GEN-LAST:event_btnNewBackupActionPerformed
 
@@ -401,21 +412,19 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         deleteSubTree();
     }//GEN-LAST:event_btnDeleteNodeTreActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnInsertNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertNodeTreeActionPerformed
         try {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
+            //DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
             TreePath tp = directoryTree.getSelectionPath();
-            btnNewSubTreeActionPerformedSwingWorker(evt); // TODO: sistemare finito il debug con la corretta chiamata (restyling ceo codice)            
+            insertSubTree();        
             directoryTree.setSelectionPath(tp);
             directoryTree.scrollPathToVisible(tp);
             directoryTree.expandPath(tp);
             // TODO add your handling code here:
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnInsertNodeTreeActionPerformed
 
     private void mitmAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitmAboutActionPerformed
 
@@ -423,6 +432,18 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         dialog.setVisible(true);
 
     }//GEN-LAST:event_mitmAboutActionPerformed
+
+    private void mnuLoadDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLoadDBActionPerformed
+         saveTheTree();
+    }//GEN-LAST:event_mnuLoadDBActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+         openTheTree();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void txtSearchTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchTextFocusGained
+//        txtSearchText.setText("");
+    }//GEN-LAST:event_txtSearchTextFocusGained
 
     private void deleteSubTree() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
@@ -461,7 +482,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         // Ok a questo punto posso cancellare il nodo
         node.removeFromParent();
-        //((DefaultTreeModel) directoryTree.getModel()).reload();
+ 
         ((DefaultTreeModel) directoryTree.getModel()).reload(tn);
         m_searchingNodes = null; // TODO: inserirlo dopo aver aggiornato il tree
 
@@ -485,7 +506,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            ex.printStackTrace();
         }
         //</editor-fold>
 
@@ -543,14 +563,14 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesSizeInFolder())).append(" file size in folder\n");
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesTotal())).append(" files totali in folder \n");
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSizeTotal())).append(" file size totali in folder\n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSubFolders())).append(" suobolders in folder\n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSubFolders())).append(" subfolders in folder\n");
 
                     break;
                 case FILE: {
                     sb = sb.append(" << FILE >>").append("\n");
                     //sb.append(nodeInfo.toString()).append("\n");
                     sb.append(nodeInfo.getDisplayString()).append(" (");
-                    sb.append(((FileNodeInformation) nodeInfo).getPath()).append(")\n");
+                    sb.append(((FilesystemNodeInformation) nodeInfo).getPath()).append(")\n");
                     sb.append("File size: ").append(String.valueOf(((FileNodeInformation)nodeInfo).getSize())).append("\n");
                 }
                 break;
@@ -590,6 +610,11 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         txtDetails.setText(detail);
     }
 
+    /**
+     *
+     * @param nodeStr
+     * @return
+     */
     public DefaultMutableTreeNode searchNode(String nodeStr) {
         DefaultMutableTreeNode node = null;
         //Enumeration e = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
@@ -603,16 +628,15 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             if (matcher.find()) {
                 return node;
             }
-
-//            if (nodeStr.equals(node.getUserObject().toString())
-//                    || (node.getUserObject().toString().endsWith(nodeStr))) {
-//                return node;
-//            }
         }
         return null;
     }
 
     // TODO: Scegliere il file
+
+    /**
+     *
+     */
     public void saveTheTree() {
 
         JFileChooser chooser = new JFileChooser();
@@ -653,10 +677,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             out.flush();
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);            
         }
     }
 
+    /**
+     *
+     */
     public void openTheTree() {
         JFileChooser chooser = new JFileChooser();
         Path currentPath = Paths.get(Constants.getInstance().getLatestSavePath() + File.separator + Constants.getInstance().getLatestSaveFilename());
@@ -695,26 +722,29 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             directoryTree.setModel(atm);
             ((DefaultTreeModel) directoryTree.getModel()).reload();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException | ClassNotFoundException e) {
+            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDeleteNodeTre;
+    private javax.swing.JButton btnDeleteNodeTree;
+    private javax.swing.JButton btnInsertNodeTree;
     private javax.swing.JButton btnLoadTree;
     private javax.swing.JButton btnNewBackup;
     private javax.swing.JButton btnSaveTree;
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton btnUpdateNodeTree;
     private javax.swing.JButton btnViewLog;
     private javax.swing.JTree directoryTree;
-    private javax.swing.JButton jButton1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JMenuItem mitmAbout;
+    private javax.swing.JMenu mnu2About;
+    private javax.swing.JMenuItem mnuLoadDB;
     private javax.swing.JTextArea txtDetails;
     private javax.swing.JTextField txtSearchText;
     // End of variables declaration//GEN-END:variables
