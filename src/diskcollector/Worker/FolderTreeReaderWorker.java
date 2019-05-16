@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package diskcollector;
+package diskcollector.Worker;
 
+import diskcollector.NodeTypes.BackupNodeInformation;
 import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.FolderNodeInformation;
 import diskcollector.NodeTypes.NodeInformation;
@@ -25,10 +26,7 @@ import java.util.Stack;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
 
-// TODO: implementare il worker in modo che restituisca un progress status ed una stringa con il path
-//       appena letto
 /**
  *
  * @author utente
@@ -44,16 +42,39 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     private final Comparator< DefaultMutableTreeNode> tnc = new Comparator< DefaultMutableTreeNode>() {
         @Override
         public int compare(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
-            //Sort the parent and child nodes separately:
-            if (a.isLeaf() && !b.isLeaf()) {
+            NodeInformation aNode = (NodeInformation) a.getUserObject();
+            NodeInformation bNode = (NodeInformation) b.getUserObject();
+
+            // Se è un folder comunque lo ordino per primo
+            if (aNode.getType()==NodeType.FILE && bNode.getType()==NodeType.FOLDER){
                 return 1;
-            } else if (!a.isLeaf() && b.isLeaf()) {
+            } else if (aNode.getType()==NodeType.FOLDER && bNode.getType()==NodeType.FILE){
                 return -1;
             } else {
-                String sa = a.getUserObject().toString();
-                String sb = b.getUserObject().toString();
-                return sa.compareToIgnoreCase(sb);
+                return compareString(a, b);
             }
+            
+            
+//            //Sort the parent and child nodes separately:
+//            if (a.isLeaf() && !b.isLeaf()) {
+//
+//                    return 1;
+//                
+//            } else if (!a.isLeaf() && b.isLeaf()) {         
+//                
+//                    return -1;
+//                
+//            } else {
+//
+//                return compareString(a, b);
+//            }
+
+        }
+
+        private int compareString(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
+            String sa = a.getUserObject().toString();
+            String sb = b.getUserObject().toString();
+            return sa.compareToIgnoreCase(sb);
         }
     };
 
@@ -65,27 +86,24 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     public FolderTreeReaderWorker(Path path, DefaultMutableTreeNode topNode) {
         this.path = path;
         this.topNode = topNode;
-        this.topNodeCancelledThread = topNode; // TODO: da modificare, così crea un riferimento che ritorna comunque un nodo aggiornato
+        this.topNodeCancelledThread = topNode; 
 
     }
 
-//    public void setWorkerCallBack(WorkerCallBack workerCallBack) {
-//        this.workerCallBack = workerCallBack;
-//    }
     private DefaultMutableTreeNode readDirectory(Path path, DefaultMutableTreeNode topNode) {
 
         final DefaultMutableTreeNode albero = topNode;
         final Stack directoryStack = new Stack<DefaultMutableTreeNode>();
 
         try {
-            Files.walkFileTree(path, new FileVisitor<Path>() {                
+            Files.walkFileTree(path, new FileVisitor<Path>() {
 
                 DefaultMutableTreeNode directoryTemp = null;
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
-                    if (FolderTreeReaderWorker.this.isCancelled()) {                        
+                    if (FolderTreeReaderWorker.this.isCancelled()) {
                         return FileVisitResult.TERMINATE;
                     }
 
@@ -94,11 +112,11 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
 
                     BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
 
-                    fileNodeInformation.setCreateDateTime(attr.creationTime().toMillis());
-                    fileNodeInformation.setLastModifiedDateTime(attr.lastModifiedTime().toMillis());
-                    fileNodeInformation.setLastAccessedDateTime(attr.lastAccessTime().toMillis());
+                    fileNodeInformation.setCreateDateTimeMillis(attr.creationTime().toMillis());
+                    fileNodeInformation.setLastModifiedDateTimeMillis(attr.lastModifiedTime().toMillis());
+                    fileNodeInformation.setLastAccessedDateTimeMillis(attr.lastAccessTime().toMillis());
                     fileNodeInformation.setSize(attr.size());
-                    
+
                     directoryTemp.add(new DefaultMutableTreeNode(fileNodeInformation));
 
                     updateFilesInFolderInformation((FolderNodeInformation) directoryTemp.getUserObject(), file.toFile());
@@ -129,13 +147,15 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     if (exc != null) {
                         publish(" --- Problemi ad attraversare: " + dir + " (" + exc + ")");
                     } else {
-                        if (directoryTemp.getDepth() == 0) {
-                            //directoryTemp.add(new DefaultMutableTreeNode(new EmptyNodeInformation())); // TODO: Verificare se va bene
-                        }
+//                        if (directoryTemp.getDepth() == 0) {
+//                            //directoryTemp.add(new DefaultMutableTreeNode(new EmptyNodeInformation())); // TODO: Verificare se va bene
+//                        }
 
                         NodeInformation upFolder = (NodeInformation) ((DefaultMutableTreeNode) directoryTemp.getParent()).getUserObject();
                         if (upFolder.getType() == NodeType.FOLDER) {
-                            updateUpFolder((FolderNodeInformation)upFolder, (FolderNodeInformation) directoryTemp.getUserObject());
+                            updateUpFolder((FolderNodeInformation) upFolder, (FolderNodeInformation) directoryTemp.getUserObject());
+                        } else if (upFolder.getType() == NodeType.BACKUP) {  // TODO: Gestire il tipo nodo backup e folder come container e usare i metodi base identici per aggiornare i totali
+                            updateBackupNode((BackupNodeInformation) upFolder, (FolderNodeInformation) directoryTemp.getUserObject());
                         }
                         // Vedere come usare questa struttura per eliminare lo stack
                         directoryTemp = (DefaultMutableTreeNode) directoryTemp.getParent();
@@ -143,28 +163,27 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                     // Fa la stessa cosa di directoryTemp.getParent();
                     directoryStack.pop();  // Se esco dalla subdir la rimuovo dallo stack diquelle da visitare
                     // Ignore errors traversing a folder
-                   
+
                     publish(dir.toString() + "\n");
-                    
+
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path folderPath, BasicFileAttributes bfa) throws IOException {
                     //System.out.println("Directory: " + t);
-                    DefaultMutableTreeNode ultimoFiglio;                    
+                    DefaultMutableTreeNode ultimoFiglio;
 
                     FolderNodeInformation foldernodeInformation = new FolderNodeInformation(folderPath);
-                    
+
                     BasicFileAttributes attr = Files.readAttributes(folderPath, BasicFileAttributes.class);
 
-                    foldernodeInformation.setCreateDateTime(attr.creationTime().toMillis());
-                    foldernodeInformation.setLastModifiedDateTime(attr.lastModifiedTime().toMillis());
-                    foldernodeInformation.setLastAccessedDateTime(attr.lastAccessTime().toMillis());
+                    foldernodeInformation.setCreateDateTimeMillis(attr.creationTime().toMillis());
+                    foldernodeInformation.setLastModifiedDateTimeMillis(attr.lastModifiedTime().toMillis());
+                    foldernodeInformation.setLastAccessedDateTimeMillis(attr.lastAccessTime().toMillis());
 
-
-                    directoryTemp = new DefaultMutableTreeNode(foldernodeInformation);                    
-                    if (directoryStack.empty()) {                        
+                    directoryTemp = new DefaultMutableTreeNode(foldernodeInformation);
+                    if (directoryStack.empty()) {
                         ultimoFiglio = directoryTemp;
                         albero.add(ultimoFiglio);
                         directoryStack.push(ultimoFiglio);
@@ -173,9 +192,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                         directoryStack.push(directoryTemp);
                         ultimoFiglio.add(directoryTemp);
                     }
-                    
-                    
-                    
+
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -188,14 +205,19 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                  * @param folderNode
                  */
                 private void updateFilesInFolderInformation(FolderNodeInformation folderNode, File file) {
-                    long infoTemp = folderNode.getFilesInFolder()+1;
-                    folderNode.setFilesInFolder(infoTemp);
-                    folderNode.setFilesTotal(folderNode.getFilesTotal()+1);  // Aggiorno anche questo valore che verrà utilizzato nella post visit per aggiornare l'upfolder
-                    
-                    infoTemp = folderNode.getFilesSizeInFolder();                    
+                    long infoTemp = folderNode.getFirstFilesInFolder() + 1;    // File diretti
+                    folderNode.setFirstFilesInFolder(infoTemp);
+
+                    // Files totali
+                    folderNode.setFilesTotal(folderNode.getFilesTotal() + 1);  // Aggiorno anche questo valore che verrà utilizzato nella post visit per aggiornare l'upfolder
+
+                    // Dimensioni dei files nella folder
+                    infoTemp = folderNode.getFirstFilesSizeInFolder();
                     infoTemp += file.length();
-                    folderNode.setFilesSizeInFolder(infoTemp);
-                    folderNode.setSizeTotal(folderNode.getSizeTotal()+file.length());
+                    folderNode.setFirstFilesSizeInFolder(infoTemp);
+
+                    // Dimensioni totali dei files
+                    folderNode.setSizeTotal(folderNode.getSizeTotal() + file.length());
                 }
 
                 /**
@@ -206,14 +228,27 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
                  */
                 private void updateUpFolder(FolderNodeInformation upFolder, FolderNodeInformation currentFolder) {
                     long infoTemp;
-                    
+
+                    // File totali
                     infoTemp = upFolder.getFilesTotal() + currentFolder.getFilesTotal();
                     upFolder.setFilesTotal(infoTemp);
-                    
+
+                    // Dimensioni totali
                     infoTemp = upFolder.getSizeTotal() + currentFolder.getSizeTotal();
                     upFolder.setSizeTotal(infoTemp);
-                    
-                    upFolder.setSubFolders(upFolder.getSubFolders()+1);
+
+                    // Subfolder dirette
+                    upFolder.setFirstSubFolders(upFolder.getFirstSubFolders() + 1);
+
+                    // Folder totali
+                    upFolder.setFoldersTotal(1 + upFolder.getFoldersTotal() + currentFolder.getFoldersTotal());
+
+                }
+
+                private void updateBackupNode(BackupNodeInformation upFolder, FolderNodeInformation currentFolder) {
+                    upFolder.setFilesTotal(upFolder.getFilesTotal() + currentFolder.getFilesTotal());
+                    upFolder.setFoldersTotal(upFolder.getFoldersTotal() + currentFolder.getFoldersTotal());
+                    upFolder.setSizeTotal(upFolder.getSizeTotal() + currentFolder.getSizeTotal());
                 }
             });
         } catch (IOException e) {
@@ -241,7 +276,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     private void sortNodes(DefaultMutableTreeNode parent) {
         int n = parent.getChildCount();
 
-        List< DefaultMutableTreeNode> children = new ArrayList< DefaultMutableTreeNode>(n);
+        List< DefaultMutableTreeNode> children = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             children.add((DefaultMutableTreeNode) parent.getChildAt(i));
         }
@@ -252,13 +287,10 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
         });
     }
 
-
     /////////// SWING WORKER METHODS ///////////
-
     /**
      *
-     * @return
-     * @throws Exception
+     * @return @throws Exception
      */
     @Override
     protected DefaultMutableTreeNode doInBackground() throws Exception {
@@ -278,7 +310,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
     protected void process(List<String> chunks) {
         chunks.forEach((fileProcessed) -> {
             txtLogArea.append(fileProcessed);
-        });        
+        });
     }
 
     /**
@@ -286,7 +318,7 @@ public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, 
      */
     @Override
     protected void done() {
-        super.done(); 
+        super.done();
         // Viene lanciato un PropertyChangeEvent con valore SwingWorker.StateValue.DONE
         // Gestisco la UI nel relativo listener della dialog parent 
     }

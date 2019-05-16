@@ -5,24 +5,26 @@
  */
 package diskcollector;
 
+import diskcollector.Worker.FilesystemActionWorker;
+import diskcollector.Worker.FolderTreeReaderWorker;
 import diskcollector.NodeTypes.BackupNodeInformation;
-import diskcollector.NodeTypes.EmptyNodeInformation;
+import diskcollector.NodeTypes.CollectionNodeInformation;
 import diskcollector.NodeTypes.FileNodeInformation;
 import diskcollector.NodeTypes.FilesystemNodeInformation;
 import diskcollector.NodeTypes.FolderNodeInformation;
 import diskcollector.NodeTypes.NodeInformation;
 import diskcollector.NodeTypes.NodeType;
 import diskcollector.UI.DlgAbout;
+import diskcollector.UI.DlgFilesystemAction;
 import diskcollector.UI.DlgSwingWorkerLog;
 import java.awt.Cursor;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
@@ -62,7 +64,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         initComponents();
 
         //UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
-        
         // Inizializzo il tree
         DefaultMutableTreeNode topNode = new DefaultMutableTreeNode(new NodeInformation(Constants.ROOT_STRING, NodeType.ROOT));
         DefaultTreeModel defaultTreeModel = new DefaultTreeModel(topNode);
@@ -70,12 +71,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         directoryTree.addTreeSelectionListener(this);
         directoryTree.setCellRenderer(new NodeCellRenderer());
         // Uso la stessa azione del bottone cerca quando premo invio
-        txtSearchText.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
-            }
-        });
+        txtSearchText.addActionListener(this::btnSearchActionPerformed);
     }
 
     /**
@@ -167,14 +163,14 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         jSplitPane1.setRightComponent(jScrollPane2);
 
-        btnSaveTree.setText("Salva tutto");
+        btnSaveTree.setText("Salva DB");
         btnSaveTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveTreeActionPerformed(evt);
             }
         });
 
-        btnLoadTree.setText("Carica");
+        btnLoadTree.setText("Carica DB");
         btnLoadTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLoadTreeActionPerformed(evt);
@@ -243,14 +239,14 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                         .addComponent(btnDeleteNodeTre)
                         .addGap(18, 18, 18)
                         .addComponent(btnInsertNodeTree)
-                        .addGap(24, 24, 24)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDeleteNodeTree)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnViewLog)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 166, Short.MAX_VALUE)
                         .addComponent(btnSaveTree)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLoadTree)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnViewLog))
+                        .addComponent(btnLoadTree))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(txtSearchText)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -281,13 +277,21 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void insertSubTree() throws InterruptedException, ExecutionException {
+    /**
+     * Inserisce un subtree controllando che il nodo padre sia un backup node
+     *
+     * return True se il sotto albero è stato inserito altrimenti false
+     *
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    private boolean insertSubTree() throws InterruptedException, ExecutionException {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
 
         //Nessuna selezione o selezionato un nodo che non è un backup set
         if (selectedNode == null || ((NodeInformation) selectedNode.getUserObject()).getType() != NodeType.BACKUP) {
             JOptionPane.showMessageDialog(this, "Selezionare un nodo Backup", "Informazione", JOptionPane.WARNING_MESSAGE);
-            return;
+            return false;
         }
 
         JFileChooser chooser = new JFileChooser();
@@ -300,14 +304,15 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         chooser.setAcceptAllFileFilterUsed(false);
         //    
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
-            return;
+            return false;
         }
 
         DefaultTreeModel defaultTreeModel = (DefaultTreeModel) directoryTree.getModel();
         DefaultMutableTreeNode topNode
                 = (m_selectedNode == null) ? (DefaultMutableTreeNode) defaultTreeModel.getRoot() : m_selectedNode;
 
-        DefaultMutableTreeNode topNodeTemp = new DefaultMutableTreeNode(new EmptyNodeInformation()); // Nodo temporaneo
+        //DefaultMutableTreeNode topNodeTemp = new DefaultMutableTreeNode(new EmptyNodeInformation()); // Nodo temporaneo
+        DefaultMutableTreeNode topNodeTemp = new DefaultMutableTreeNode(new BackupNodeInformation()); // Nodo temporaneo
 
         this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
         FolderTreeReaderWorker folderTreeReaderWorker = new FolderTreeReaderWorker(Paths.get(chooser.getSelectedFile().getAbsolutePath()), topNodeTemp);
@@ -316,6 +321,22 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         dlgSwingWorkerLog.startWorkerAndShowDialog();
 
         if (folderTreeReaderWorker.isDone() && !folderTreeReaderWorker.isCancelled()) {
+            // Aggiorno i dati del backupset
+            if (((NodeInformation) topNode.getUserObject()).getType() != NodeType.BACKUP) {
+                try {
+                    throw new Exception("Qui non dovrei arrivare mai");
+                } catch (Exception ex) {
+                    Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            BackupNodeInformation bkpTemp = (BackupNodeInformation) topNodeTemp.getUserObject();  // Il primo è sicuramenteun backup
+            BackupNodeInformation bkpCurrentTemp = (BackupNodeInformation) topNode.getUserObject(); // se arrivo qui anche questo è un backup
+
+            bkpCurrentTemp.setFilesTotal(bkpCurrentTemp.getFilesTotal() + bkpTemp.getFilesTotal());
+            bkpCurrentTemp.setFoldersTotal(bkpCurrentTemp.getFoldersTotal() + bkpTemp.getFoldersTotal() + 1); // Aggiungo anche la prima folder
+            bkpCurrentTemp.setSizeTotal(bkpCurrentTemp.getSizeTotal() + bkpTemp.getSizeTotal());
+
             topNode = (DefaultMutableTreeNode) folderTreeReaderWorker.get().getChildAt(0); // Carico tutti i sottonodi dell'albero creato con il placeholder 
             // Oppure
             //topNode.add((MutableTreeNode) topNodeTemp.getFirstChild());
@@ -328,13 +349,15 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         ((DefaultTreeModel) directoryTree.getModel()).reload();
         m_searchingNodes = null;
+
+        return true;
     }
 
     private void btnDeleteNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteNodeTreeActionPerformed
-
+       
         deleteSubTree();
 
-        m_searchingNodes = null; // TODO: inserirlo dopo aver aggiornato il tree
+        m_searchingNodes = null; 
     }//GEN-LAST:event_btnDeleteNodeTreeActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
@@ -357,13 +380,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }//GEN-LAST:event_btnSaveTreeActionPerformed
 
     private void btnLoadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTreeActionPerformed
-        openTheTree();       
+        openTheTree();
     }//GEN-LAST:event_btnLoadTreeActionPerformed
 
     private void btnViewLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewLogActionPerformed
-        int val= JOptionPane.showConfirmDialog(this, "Conferma", "Cancello tutto?", JOptionPane.OK_CANCEL_OPTION);
-        if (val != JOptionPane.OK_OPTION){
-            return;                    
+        int val = JOptionPane.showConfirmDialog(this, "Conferma", "Cancello tutto?", JOptionPane.OK_CANCEL_OPTION);
+        if (val != JOptionPane.OK_OPTION) {
+            return;
         }
         ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).removeAllChildren();
         ((DefaultTreeModel) directoryTree.getModel()).reload();
@@ -400,9 +423,10 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
 //If you're here, the return value was the string.
         DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode) directoryTree.getModel().getRoot();
-        defaultMutableTreeNode.add(new DefaultMutableTreeNode(new BackupNodeInformation(
-                nome, desc
-        )));
+        BackupNodeInformation backupNodeInformation = new BackupNodeInformation(nome, desc);
+        backupNodeInformation.setRetrievingDate(new Date(LocalDate.now().toEpochDay())); // TODO: trucchetto da verificare meglio come gestirlo
+
+        defaultMutableTreeNode.add(new DefaultMutableTreeNode(backupNodeInformation));
 
         ((DefaultTreeModel) directoryTree.getModel()).reload();
     }//GEN-LAST:event_btnNewBackupActionPerformed
@@ -414,13 +438,17 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
     private void btnInsertNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertNodeTreeActionPerformed
         try {
-            //DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
             TreePath tp = directoryTree.getSelectionPath();
-            insertSubTree();        
-            directoryTree.setSelectionPath(tp);
-            directoryTree.scrollPathToVisible(tp);
-            directoryTree.expandPath(tp);
-            // TODO add your handling code here:
+            if (insertSubTree()) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
+//                BackupNodeInformation backupNodeInformation = (BackupNodeInformation) node.getUserObject();
+
+                // Aggiorno e visualizzo il jtree
+                directoryTree.setSelectionPath(tp);
+                directoryTree.scrollPathToVisible(tp);
+                directoryTree.expandPath(tp);
+            }
+            
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -434,17 +462,20 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }//GEN-LAST:event_mitmAboutActionPerformed
 
     private void mnuLoadDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLoadDBActionPerformed
-         saveTheTree();
+        saveTheTree();
     }//GEN-LAST:event_mnuLoadDBActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-         openTheTree();
+        openTheTree();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void txtSearchTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchTextFocusGained
 //        txtSearchText.setText("");
     }//GEN-LAST:event_txtSearchTextFocusGained
 
+    /**
+     * Cancella il subTree selezionato
+     */
     private void deleteSubTree() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
         if (node == null) { //Nothing is selected.     
@@ -452,7 +483,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             return;
         }
 
-        // Cancello solo i nodi Backup o filder TODO: Da rivedere sulla abse dell'UX
+        // Cancello solo i nodi Backup o folder TODO: Da rivedere sulla base dell'UX
         NodeType nt = ((NodeInformation) node.getUserObject()).getType();
         if (nt == NodeType.BACKUP || nt == NodeType.FOLDER) {
             int val = JOptionPane.showConfirmDialog(
@@ -469,9 +500,9 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         }
 
         // Salvo il Parent per poter lasciare aperto il tree
-        TreeNode tn = node.getParent();
+        TreeNode treeNodeParent = node.getParent();
         // Sono sulla root per cui non la cancello
-        if (tn == null) {
+        if (treeNodeParent == null) {
             JOptionPane.showMessageDialog(
                     this,
                     "Non è possibile cancellare questo nodo",
@@ -480,11 +511,107 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             return;
         }
 
+        // Salvo la posizione del fratello per espanderlo dopo aver cancellato il nodo
+        DefaultMutableTreeNode nodeSibling = node.getNextSibling(); // Per aprire il fratello
+        if (nodeSibling == null) {
+            nodeSibling = (DefaultMutableTreeNode) node.getParent();
+        }
+
+        updateParentNode((DefaultMutableTreeNode) treeNodeParent, (DefaultMutableTreeNode) node);
+
         // Ok a questo punto posso cancellare il nodo
         node.removeFromParent();
- 
-        ((DefaultTreeModel) directoryTree.getModel()).reload(tn);
-        m_searchingNodes = null; // TODO: inserirlo dopo aver aggiornato il tree
+
+        ((DefaultTreeModel) directoryTree.getModel()).reload(treeNodeParent);
+        m_searchingNodes = null; 
+
+        // Espando il fratello, visto che recupero comunque il nodo padre dovrei sempre passare l'if
+        if (nodeSibling != null) {
+            TreeNode[] nodes = ((DefaultTreeModel) directoryTree.getModel()).getPathToRoot(nodeSibling);
+            TreePath path = new TreePath(nodes);
+            directoryTree.scrollPathToVisible(path);
+            directoryTree.setSelectionPath(path);
+        }
+    }
+
+    private void updateParentNode(DefaultMutableTreeNode parentTreeNode, DefaultMutableTreeNode actualTreeNode) {
+        NodeType nt = ((NodeInformation) actualTreeNode.getUserObject()).getType();
+// Calcolo i parametri da aggiornare
+//        long filesTotal = 0;
+//        long foldersTotal = 0;
+//        long sizeTotal = 0;
+
+        switch (nt) {
+            case FOLDER:
+            case BACKUP:
+                CollectionNodeInformation ob = (CollectionNodeInformation) actualTreeNode.getUserObject();
+                //FolderNodeInformation ob1 = (FolderNodeInformation) node.getUserObject();
+//                filesTotal = ob.getFilesTotal();
+//                foldersTotal = ob.getFoldersTotal();
+//                sizeTotal = ob.getSizeTotal();
+                
+                TreeNode[] nodePath = actualTreeNode.getPath();
+                // Ciclare dal secondo nodo al penultimo: il primo è la root mentre l'ultimo è il nodo da cancellare
+                long filesTotalTemp = 0;
+                long foldersTotalTemp = 0;
+                long sizeTotalTemp = 0;
+                DefaultMutableTreeNode nodeTemp;
+                CollectionNodeInformation cniTemp;
+                nodeTemp = (DefaultMutableTreeNode) nodePath[nodePath.length - 1];
+                cniTemp = (CollectionNodeInformation) nodeTemp.getUserObject();
+
+                filesTotalTemp = cniTemp.getFilesTotal();
+                foldersTotalTemp = cniTemp.getFoldersTotal();
+                sizeTotalTemp = cniTemp.getSizeTotal();
+
+                CollectionNodeInformation cniTempParent;
+                DefaultMutableTreeNode nodeTempParent;
+                for (int i = nodePath.length - 2; i >= 1; i--) { // Salto il primo e l'ultimo livello (Nodo Radice e foglia da cancellare risoettivamente)
+                    nodeTempParent = (DefaultMutableTreeNode) nodePath[i];
+                    cniTempParent = (CollectionNodeInformation) nodeTempParent.getUserObject();
+                    cniTempParent.setFilesTotal(cniTempParent.getFilesTotal() - filesTotalTemp);
+                    cniTempParent.setFoldersTotal(cniTempParent.getFoldersTotal() - foldersTotalTemp - 1); // Elimino anche la subdir stessa
+                    cniTempParent.setSizeTotal(cniTempParent.getSizeTotal() - sizeTotalTemp);
+                }
+
+                // Aggiorno il nodo padre
+                //DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) parentTreeNode;
+                NodeInformation parentNode = (NodeInformation) parentTreeNode.getUserObject();
+
+                // Verifico se sia un container (probabilmente p superfluo)
+                switch (parentNode.getType()) {
+                    case FOLDER:
+                    case BACKUP:
+                    case ROOT:
+
+                        break;
+                    default: // Se sono qui qualcosa è andato molto storto per cui non faccio nulla
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Qualcosa è andato molto storto, il nodo da aggiornare non è né un folder né un backup, non faccio nulla",
+                                "Attenzione",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                }
+
+                // Aggiorno le subdir dirette del parent
+                // PROBABILE BUG, se il nodo non è né folder né backup ho un problema (provo a chiamare il metodo comune tra backup node e filde rnode)
+                if (parentNode.getType() == NodeType.FOLDER) {
+                    //FolderNodeInformation folderNodeTemp = (FolderNodeInformation) parentTreeNode.getUserObject();
+                    FolderNodeInformation folderNodeTemp = (FolderNodeInformation) parentNode; // Per comodità
+                    folderNodeTemp.setFirstSubFolders(folderNodeTemp.getFirstSubFolders() - 1);
+                }
+
+                break;
+
+            default: // Se sono qui qualcosa è andato molto storto per cui non faccio nulla
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Qualcosa è andato molto storto, il nodo da cancellare non è né un folder né un backup non faccio nulla",
+                        "Attenzione",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+        }
 
     }
 
@@ -513,6 +640,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new MainFrame().setVisible(true);
             }
@@ -520,8 +648,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }
 
     /**
-     * Recupera i dettagli e li mostra TODO: Da completare per ora è solo un
-     * placeholder
+     * Recupera i dettagli e li mostra 
      *
      * @param e Evento
      */
@@ -548,9 +675,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
             switch (nodeInfo.getType()) {
                 case BACKUP: {
+                    BackupNodeInformation backupNodeTemp = (BackupNodeInformation) nodeInfo;
                     sb.append("<< Backup set  >>").append("\n");
                     sb.append(nodeInfo.toString()).append("\n");
-                    sb.append(((BackupNodeInformation) nodeInfo).getDetails()).append("\n");
+                    sb.append(backupNodeTemp.getDetails()).append("\n");
+                    sb.append("Files totali: ").append(String.valueOf(backupNodeTemp.getFilesTotal())).append("\n");
+                    sb.append("Directory totali: ").append(String.valueOf(backupNodeTemp.getFoldersTotal())).append("\n");
+                    sb.append("Dimensioni totali: ").append(String.valueOf(backupNodeTemp.getSizeTotal())).append("\n");
                 }
                 break;
                 case FOLDER:
@@ -559,19 +690,19 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                     sb.append(nodeInfo.getDisplayString()).append(" (");
                     sb.append(((FilesystemNodeInformation) nodeInfo).getPath()).append(")\n");
 
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesInFolder())).append(" files in folder \n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesSizeInFolder())).append(" file size in folder\n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesTotal())).append(" files totali in folder \n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSizeTotal())).append(" file size totali in folder\n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSubFolders())).append(" subfolders in folder\n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFirstFilesInFolder())).append(" files in folder \n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFirstFilesSizeInFolder())).append(" file size in folder\n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFirstSubFolders())).append(" subfolders in folder\n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesTotal())).append(" files totali sotto il folder \n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSizeTotal())).append(" file size totali nel folder\n");
+                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFoldersTotal())).append(" folder totali nel folder\n");
 
                     break;
                 case FILE: {
                     sb = sb.append(" << FILE >>").append("\n");
-                    //sb.append(nodeInfo.toString()).append("\n");
                     sb.append(nodeInfo.getDisplayString()).append(" (");
                     sb.append(((FilesystemNodeInformation) nodeInfo).getPath()).append(")\n");
-                    sb.append("File size: ").append(String.valueOf(((FileNodeInformation)nodeInfo).getSize())).append("\n");
+                    sb.append("File size: ").append(String.valueOf(((FileNodeInformation) nodeInfo).getSize())).append("\n");
                 }
                 break;
 
@@ -594,11 +725,11 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 ////            System.out.println( nodeInfo.getDisplayString());
 //        }
         if (nodeInfo.getType() == NodeType.FILE || nodeInfo.getType() == NodeType.FOLDER) {
-            Date d = new Date(((FilesystemNodeInformation) nodeInfo).getCreateDateTime());
+            Date d = new Date(((FilesystemNodeInformation) nodeInfo).getCreateDateTimeMillis());
             sb.append("Created: ").append(d.toString()).append("\n");
-            d = new Date(((FilesystemNodeInformation) nodeInfo).getLastModifiedDateTime());
+            d = new Date(((FilesystemNodeInformation) nodeInfo).getLastModifiedDateTimeMillis());
             sb.append("Last modified time: ").append(d.toString()).append("\n");
-            d = new Date(((FilesystemNodeInformation) nodeInfo).getLastAccessedDateTime());
+            d = new Date(((FilesystemNodeInformation) nodeInfo).getLastAccessedDateTimeMillis());
             sb.append("Last access time: ").append(d.toString()).append("\n");
         }
 
@@ -631,13 +762,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         }
         return null;
     }
-
-    // TODO: Scegliere il file
-
+    
     /**
      *
      */
     public void saveTheTree() {
+
+        boolean toOverwrite = false;
 
         JFileChooser chooser = new JFileChooser();
         Path currentPath = Paths.get(Constants.getInstance().getLatestSavePath() + File.separator + Constants.getInstance().getLatestSaveFilename());
@@ -663,21 +794,36 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             if (val != JOptionPane.YES_OPTION) {
                 return;
             }
+            toOverwrite = true;
         }
 
         Constants.getInstance().setLatestSavePath(chooser.getSelectedFile().getParent());
         Constants.getInstance().setLatestSaveFilename(chooser.getSelectedFile().getName());
 
         TreeModel tm = directoryTree.getModel();   //tree is of type MyTree which extends JTree. It creates a tree from an XML document
-        //latestDBSaveParh = chooser.getSelectedFile().getParent(); // Salvo la posizione corrente
-        try {
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(chooser.getSelectedFile().getAbsolutePath()));
 
-            out.writeObject(tm);//the actual tree object
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);            
+//        try {
+//            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(chooser.getSelectedFile().getAbsolutePath()))) {
+//                out.writeObject(tm);//the actual tree object
+//                out.flush();
+//            } //the actual tree object
+//        } catch (IOException e) {
+//            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
+//        }
+        FilesystemActionWorker filesystemActionWorker = new FilesystemActionWorker(chooser.getSelectedFile().getAbsolutePath(), false);
+        filesystemActionWorker.setObjectToWrite(tm);
+
+        DlgFilesystemAction dlgFilesystemAction = new DlgFilesystemAction(this, true, filesystemActionWorker, false);
+
+        dlgFilesystemAction.startWorkerAndShowDialog(); // Aspetto che il thread finisca
+//        try {
+//            filesystemActionWorker.get();
+//        } catch (InterruptedException | ExecutionException ex) {
+//            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        if (filesystemActionWorker.isCancelled()) {
+            String msg = "Nessun file è stato salvato" + (toOverwrite ? ". Il file esistente è stato conservato" : "");
+            JOptionPane.showMessageDialog(this, msg, "Attenzione", JOptionPane.OK_OPTION);
         }
     }
 
@@ -688,7 +834,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         JFileChooser chooser = new JFileChooser();
         Path currentPath = Paths.get(Constants.getInstance().getLatestSavePath() + File.separator + Constants.getInstance().getLatestSaveFilename());
         chooser.setSelectedFile(new File(currentPath.toAbsolutePath().toString()));
-        chooser.setDialogTitle("Salvo il DB");
+        chooser.setDialogTitle("Carico il DB");
         //chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         //
         // disable the "All files" option.
@@ -708,11 +854,25 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         m_searchingNodes = null; // reinizializzo la ricerca
 
         try {
-            // TODO: usare uno swingworker per caricare il file ed impostare correttamente il cursore prima e dopo il caricamento
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(chooser.getSelectedFile().getAbsolutePath()));
-            TreeModel atm = (TreeModel) in.readObject();
-            in.close();
+            TreeModel atm;
 
+            // Avvio i componenti per caricare i dati (worker e dialog)
+            FilesystemActionWorker filesystemActionWorker = new FilesystemActionWorker(chooser.getSelectedFile().getAbsolutePath(), true);
+            DlgFilesystemAction dlgFilesystemAction = new DlgFilesystemAction(this, true, filesystemActionWorker, true);
+
+            dlgFilesystemAction.startWorkerAndShowDialog(); // Aspetto che il thread finisca
+
+            // Sembra che si blocchi comunque anche se il thread è stato cancellato
+            if (filesystemActionWorker.isCancelled()) {
+                return;
+            }
+
+            atm = filesystemActionWorker.get(); // Recupero il treemodel            
+            if (atm == null) { // Se è nullo esco in quanto ci potrebbe essere stato un problema nel leggere il file
+                return;
+            }
+
+            // A questo punto agisco
             // Cancello tutto il tree
             DefaultTreeModel defaultTreeModel = new DefaultTreeModel(null);
             directoryTree.setModel(defaultTreeModel);
@@ -722,7 +882,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             directoryTree.setModel(atm);
             ((DefaultTreeModel) directoryTree.getModel()).reload();
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
         }
     }

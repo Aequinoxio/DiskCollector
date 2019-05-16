@@ -47,7 +47,7 @@ public class DlgAbout extends javax.swing.JDialog {
             try (FileReader fr = new FileReader(about)) {
                 BufferedReader br = new BufferedReader(fr);
                 String temp;
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 while ((temp = br.readLine()) != null) {
                     sb.append(temp);
                 }
@@ -141,19 +141,18 @@ public class DlgAbout extends javax.swing.JDialog {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(DlgAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DlgAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DlgAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DlgAbout.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+        } 
+        //</editor-fold>
+        //</editor-fold>
+        
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 DlgAbout dialog = new DlgAbout(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {

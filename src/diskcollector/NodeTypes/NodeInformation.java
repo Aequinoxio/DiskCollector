@@ -15,7 +15,7 @@ public class NodeInformation implements Serializable {
     private NodeType type;
 
     /**
-     *
+     * Costruttore generico
      */
     public NodeInformation() {
         this.displayString="NONE";
@@ -23,9 +23,10 @@ public class NodeInformation implements Serializable {
     }
 
     /**
-     *
-     * @param displayString
-     * @param type
+     * Costruttore
+     * Viene impostato il valore di default per la stringa da mostrare  e per il nodo
+     * @param displayString Stringa da mostrare
+     * @param type Tipo di noto
      */
     public NodeInformation(String displayString, NodeType type) {
         this.displayString = displayString;
@@ -33,8 +34,9 @@ public class NodeInformation implements Serializable {
     }
 
     /**
-     *
-     * @param type
+     * Costruttore
+     * Viene impostato il valore di default per la stringa da mostrare 
+     * @param type Tipo di nodo
      */
     public NodeInformation(NodeType type) {
         this.displayString="NONE";
@@ -42,8 +44,9 @@ public class NodeInformation implements Serializable {
     }
 
     /**
-     *
-     * @param displayString
+     * Costruttore
+     * Viene impostato il tipo nodo generico di default
+     * @param displayString 
      */
     public NodeInformation(String displayString) {
         this.displayString = displayString;
@@ -51,33 +54,34 @@ public class NodeInformation implements Serializable {
     }
 
     /**
-     *
-     * @return
+     * Restituisce il tipo di nodo
+     * @return Tipo di nodo
      */
     public NodeType getType() {
         return type;
     }
 
     /**
-     *
-     * @return
+     * Restituisce la stringa da mostrare
+     * @return Stringa da mostrare
      */
     public String getDisplayString() {
         return displayString;
     }
 
     /**
-     *
-     * @param displayString
+     * Imposta la stringa da mostrare sovrascrivendo quella usada nel costruttore
+     * @param displayString Stringa da mostrare
      */
     public void setDisplayString(String displayString) {
         this.displayString = displayString;
     }
     
     /**
-     *
-     * @return
+     * Restituisce la stringa da nostrare
+     * @return Strinda da mostrare
      */
+    @Override
     public String toString(){
         return displayString;
     }

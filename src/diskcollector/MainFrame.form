@@ -84,14 +84,14 @@
                       <Component id="btnDeleteNodeTre" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="btnInsertNodeTree" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnDeleteNodeTree" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="159" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="btnViewLog" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="166" max="32767" attributes="0"/>
                       <Component id="btnSaveTree" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnLoadTree" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnViewLog" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="txtSearchText" max="32767" attributes="0"/>
@@ -237,7 +237,7 @@
     </Container>
     <Component class="javax.swing.JButton" name="btnSaveTree">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Salva tutto"/>
+        <Property name="text" type="java.lang.String" value="Salva DB"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveTreeActionPerformed"/>
@@ -245,7 +245,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="btnLoadTree">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Carica"/>
+        <Property name="text" type="java.lang.String" value="Carica DB"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoadTreeActionPerformed"/>

@@ -74,13 +74,11 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
                     break;
                 }
                 case FILE: {
-                    //Project project = (Project) userObject;
                     String text = String.format(SPAN_FORMAT, "green", userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     break;
                 }
                 case FOLDER: {
-                    //Project project = (Project) userObject;
                     String text = String.format(SPAN_FORMAT_FOLDER, "green", userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     if (expanded) {
@@ -92,7 +90,6 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
                 }
 
                 case ROOT: {
-                    //Project project = (Project) userObject;
                     String text = String.format(SPAN_FORMAT_ROOT, "blue", userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     this.setIcon(mainIcon);

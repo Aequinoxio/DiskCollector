@@ -12,32 +12,32 @@ package diskcollector.NodeTypes;
 public enum NodeType {
 
     /**
-     *
+     * Tipo nodo Radice
      */
     ROOT,
 
     /**
-     *
+     * Tipo nodo backup
      */
     BACKUP,
 
     /**
-     *
+     * Tipo nodo File
      */
     FILE,
 
     /**
-     *
+     * Tipo nodo Folder
      */
     FOLDER,
 
     /**
-     *
+     * Tipo nodo generico
      */
     GENERIC,
 
     /**
-     *
+     * Tipo per un nodo placeholder che non sia identificabile con nessuno degli altri tipi
      */
     EMPTY_PLACEHOLDER;
 }

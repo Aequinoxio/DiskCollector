@@ -5,7 +5,7 @@
  */
 package diskcollector.UI;
 
-import diskcollector.FolderTreeReaderWorker;
+import diskcollector.Worker.FolderTreeReaderWorker;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -19,6 +19,8 @@ import javax.swing.SwingWorker;
 public class DlgSwingWorkerLog extends javax.swing.JDialog {
 
     FolderTreeReaderWorker folderTreeReaderWorker;
+    
+    long startTimeMillis,endTimeMillis;
 
     /**
      * Creates new form dlgSwingWorkerLog
@@ -40,8 +42,14 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog {
 
                 // Se ho terminato il task aggiorno la UI
                 if ("state".equals(event.getPropertyName()) && SwingWorker.StateValue.DONE.equals(event.getNewValue())) {
-                    btnStopWorker.setText("Chiudi"); // TODO: da gestire il pulsante chiudi. Forse ne vanno sovrapposti 2          
+                    btnStopWorker.setText("Chiudi"); 
                     btnStopWorker.setBackground(Color.green);
+                    
+                    endTimeMillis=System.currentTimeMillis();
+                    
+                    txtLogWorker.append("\n\nTempo trascorso:");
+                    txtLogWorker.append(String.valueOf((endTimeMillis-startTimeMillis)/1000));
+                    txtLogWorker.append(" secondi\n");
                     
                     // Gestione tasto enter 
                     btnStopWorker.requestFocus();
@@ -134,6 +142,7 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog {
      *
      */
     public void startWorkerAndShowDialog() {
+        startTimeMillis=System.currentTimeMillis();
         folderTreeReaderWorker.execute();
         this.setVisible(true);
     }

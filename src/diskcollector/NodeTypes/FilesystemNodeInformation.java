@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Informazioni generiche di un oggetto del filesystem (folder o file)
+ * Nodo generico contenente informazioni di un oggetto del filesystem (folder o file)
  * @author utente
  */
 public class FilesystemNodeInformation extends NodeInformation {
@@ -20,19 +20,30 @@ public class FilesystemNodeInformation extends NodeInformation {
     private long lastAccessedDateTime;
     private long createDateTime;
     
-    // Default to NodeType.FILE
+    /**
+     * Costruttore
+     * 
+     * @param nodeType tipo nodo
+     */
     FilesystemNodeInformation(NodeType nodeType) {
         super(nodeType);
     }
 
+    /**
+     * Costruttore
+     * Viene impostata la stringa da mostrare ed il tipo di nodo
+     * @param toString stringa da mostrare
+     * @param nodeType tipo di nodo
+     */
     FilesystemNodeInformation(String toString,NodeType nodeType) {
         super(toString, nodeType);
     }
 
     /**
-     *
-     * @param path
-     * @param nodeType
+     * Costruttore
+     * Viene impostato il path ed il tipo di nodo
+     * @param path Path
+     * @param nodeType tipo di nodo
      */
     public FilesystemNodeInformation(Path path, NodeType nodeType) {
         super(path.getFileName() == null ? path.getRoot().toString():path.getFileName().toString(), nodeType);
@@ -40,96 +51,78 @@ public class FilesystemNodeInformation extends NodeInformation {
     }
 
     /**
-     *
-     * @param string
-     * @param path
-     * @param nodeType
+     * Costruttore
+     * Vengono impostati la stringa da mostrare, il path ed il tipo di nodo
+     * @param string Stringa da mostrare
+     * @param path Path
+     * @param nodeType tipo di nodo
      */
     public FilesystemNodeInformation(String string, Path path, NodeType nodeType) {
         super(string, nodeType);
         this.path = path.getFileName() == null ? path.getRoot().toString():path.getFileName().toString();
     }
 
-//    public FileNodeInformation(String displayString, NodeType type) {
-//        super(displayString, type);
-//    }
-//
-//    public FileNodeInformation(String displayString, Path path, NodeType type) {
-//        super(displayString, type);
-//        this.path = path.toString();
-//    }
-//
-//    public FileNodeInformation(Path path, NodeType type) {
-//        super(path.getFileName().toString(), type);
-//        this.path = path.toString();
-//    }
-//
-//    public FileNodeInformation(NodeType type) {
-//        super(type);
-//    }
-
     /**
-     *
-     * @return
+     * Restituisce il path
+     * @return path
      */
-
     public Path getPath() {
         return Paths.get(path);
     }
 
     /**
-     *
-     * @param path
+     * Imposta il path
+     * @param path Path
      */
     public void setPath(Path path) {
         this.path = path.toString();
     }
 
     /**
-     *
+     * Restituisce il tempo di ultima modifica in millisecondi
      * @return
      */
-    public long getLastModifiedDateTime() {
+    public long getLastModifiedDateTimeMillis() {
         return lastModifiedDateTime;
     }
 
     /**
-     *
+     * Imposta il tempo di ultima modifica in millisecondi
      * @param lastModifiedDateTime
      */
-    public void setLastModifiedDateTime(long lastModifiedDateTime) {
+    public void setLastModifiedDateTimeMillis(long lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
 
     /**
-     *
+     * Restituisce il tempo di ultimo accesso in millisecondi
      * @return
      */
-    public long getLastAccessedDateTime() {
+    public long getLastAccessedDateTimeMillis() {
         return lastAccessedDateTime;
     }
 
     /**
-     *
+     * Imposta il tempo di ultimo accesso in millisecondi
      * @param lastAccessedDateTime
      */
-    public void setLastAccessedDateTime(long lastAccessedDateTime) {
+    public void setLastAccessedDateTimeMillis(long lastAccessedDateTime) {
         this.lastAccessedDateTime = lastAccessedDateTime;
     }
 
     /**
-     *
+     * Restituisce il tempo di creazione in millisecondi
      * @return
      */
-    public long getCreateDateTime() {
+    public long getCreateDateTimeMillis() {
         return createDateTime;
     }
 
     /**
-     *
+     * Impostail tempo di creazione in millisecondi
      * @param createDateTime
      */
-    public void setCreateDateTime(long createDateTime) {
+    public void setCreateDateTimeMillis(long createDateTime) {
         this.createDateTime = createDateTime;
     }
 }

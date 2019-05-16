@@ -11,34 +11,37 @@ import java.nio.file.Path;
  *
  * @author utente
  */
-public class FolderNodeInformation extends FilesystemNodeInformation {
+public class FolderNodeInformation extends FilesystemNodeInformation implements CollectionNodeInformation{
 
     // Informazioni nel caso in cui l'oggetto del tree sia un folder
-//    private String path;              // 
-//    private long lastModifiedDateTime;
-//    private long lastAccessedDateTime;
-//    private long createDateTime;
-    private long sizeTotal ;
-    private long subFolders;
-    private long filesInFolder;
-    private long filesSizeInFolder;
-
-    private long filesTotal;        // Numero di files totali nella subfolder
-    //public static final NodeType type = NodeType.FILE;
+    private long subFirstFolders;           // Sub folders immediatamente collegate
+    private long filesFirstSizeInFolder;    // size dei files direttamente figli nella folder
+    private long firstFilesInFolder;        // numero di files direttamente nella folder
+    private long foldersTotal;              // folders complessive
+    private long sizeTotal ;                // dimensioni totali del folder
+    private long filesTotal;                // Numero di files totali nel folder e subfolder
 
 
-    // Default to NodeType.FILE
+    /**
+     * Costruttore
+     */
     FolderNodeInformation() {
         super(NodeType.FOLDER);
     }
 
+    /**
+     * Costruttore
+     * Viene impostata la stringa da mostrare
+     * @param toString Stringa da mostrare
+     */
     FolderNodeInformation(String toString) {
         super(toString, NodeType.FOLDER);
     }
 
     /**
-     *
-     * @param path
+     * Costruttore
+     * Viene impostato il path del nodo folder
+     * @param path Path del folder
      */
     public FolderNodeInformation(Path path) {
         super(path, NodeType.FOLDER);
@@ -46,7 +49,8 @@ public class FolderNodeInformation extends FilesystemNodeInformation {
     }
 
     /**
-     *
+     * Costruttore
+     * Vengono impostate la stringa da mostrare ed il path del folder
      * @param string
      * @param path
      */
@@ -56,134 +60,100 @@ public class FolderNodeInformation extends FilesystemNodeInformation {
     }
 
     /**
-     *
-     * @return
+     * Restituisce la dimensione dei files direttamente figli nella folder
+     * @return Dimensione dei files
      */
-    public long getFilesSizeInFolder() {
-        return filesSizeInFolder;
+    public long getFirstFilesSizeInFolder() {
+        return filesFirstSizeInFolder;
     }
 
     /**
-     *
-     * @param filesSizeInFolder
+     * Imposta la dimensione dei files direttamente figli nel folder
+     * @param filesSizeInFolder Dimensione dei files
      */
-    public void setFilesSizeInFolder(long filesSizeInFolder) {
-        this.filesSizeInFolder = filesSizeInFolder;
-    }
-
-////    public FolderNodeInformation(String displayString, NodeType type) {
-////        super(displayString, type);
-////    }
-////
-////    public FolderNodeInformation(String displayString, Path path, NodeType type) {
-////        super(displayString, type);
-////        this.path = path.toString();
-////    }
-////
-////    public FolderNodeInformation(Path path, NodeType type) {
-////        super(path.getFileName().toString(), type);
-////        this.path = path.toString();
-////    }
-//
-//    public FolderNodeInformation(NodeType type) {
-//        super(type);
-//    }
-
-//    public Path getPath() {
-//        return Paths.get(path);
-//    }
-//
-//    public void setPath(Path path) {
-//        this.path = path.toString();
-//    }
-//
-//    public long getLastModifiedDateTime() {
-//        return lastModifiedDateTime;
-//    }
-//
-//    public void setLastModifiedDateTime(long lastModifiedDateTime) {
-//        this.lastModifiedDateTime = lastModifiedDateTime;
-//    }
-//
-//    public long getLastAccessedDateTime() {
-//        return lastAccessedDateTime;
-//    }
-//
-//    public void setLastAccessedDateTime(long lastAccessedDateTime) {
-//        this.lastAccessedDateTime = lastAccessedDateTime;
-//    }
-//
-//    public long getCreateDateTime() {
-//        return createDateTime;
-//    }
-//
-//    public void setCreateDateTime(long createDateTime) {
-//        this.createDateTime = createDateTime;
-//    }
-
-    /**
-     *
-     * @return
-     */
-
-    public long getSubFolders() {
-        return subFolders;
+    public void setFirstFilesSizeInFolder(long filesSizeInFolder) {
+        this.filesFirstSizeInFolder = filesSizeInFolder;
     }
 
     /**
-     *
-     * @param subFolders
+     * Restituisce il numero dei sotto folder
+     * @return numero sotto folder
      */
-    public void setSubFolders(long subFolders) {
-        this.subFolders = subFolders;
+
+    public long getFirstSubFolders() {
+        return subFirstFolders;
     }
 
     /**
-     *
-     * @return
+     * Imposta il numero dei sotto folder
+     * @param subFolders numero sottofolder
      */
-    public long getFilesInFolder() {
-        return filesInFolder;
+    public void setFirstSubFolders(long subFolders) {
+        this.subFirstFolders = subFolders;
     }
 
     /**
-     *
-     * @param filesInFolder
+     * Restituisce il numero dei files direttamente figli del folder
+     * @return numero figli del folder
      */
-    public void setFilesInFolder(long filesInFolder) {
-        this.filesInFolder = filesInFolder;
+    public long getFirstFilesInFolder() {
+        return firstFilesInFolder;
     }
 
     /**
-     *
-     * @return
+     * Imposta il numero dei files direttamente figli del folder
+     * @param firstFilesInFolder numero figli del folder
+     */
+    public void setFirstFilesInFolder(long firstFilesInFolder) {
+        this.firstFilesInFolder = firstFilesInFolder;
+    }
+
+    /**
+     * Restituisce il numero dei files totali di tutti i sottofolder 
+     * @return numrero totale dei files
      */
     public long getFilesTotal() {
         return filesTotal;
     }
 
     /**
-     *
-     * @param filesTotal
+     * Imposta il numero dei files totali di tutti i sottofolder 
+     * @param filesTotal numero totale dei files
      */
     public void setFilesTotal(long filesTotal) {
         this.filesTotal = filesTotal;
     }
 
     /**
-     *
-     * @return
+     * Restituisce la dimensione totale dei files del folder e dei sottofolder 
+     * @return dimensione
      */
     public long getSizeTotal() {
         return sizeTotal;
     }
 
     /**
-     *
-     * @param sizeTotal
+     * Imposta la dimensione totale dei files del folder e dei sottofolder
+     * @param sizeTotal dimensione
      */
     public void setSizeTotal(long sizeTotal) {
         this.sizeTotal = sizeTotal;
+    }
+
+     /**
+     * Restituisce il numero complessivo dei sotto folder 
+     * @return numero di sotto folder
+     */
+    public long getFoldersTotal() {
+        return foldersTotal;
+    }
+
+    /**
+     * Imposta il numero complessivo di sotto folder
+     * @param foldersTotal numero di sottofolder
+     */
+    public void setFoldersTotal(long foldersTotal) {
+        this.foldersTotal = foldersTotal;
     }
 
 }
