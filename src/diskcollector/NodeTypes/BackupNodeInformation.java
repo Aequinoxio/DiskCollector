@@ -50,6 +50,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Restituisce il numero complessivo dei sotto folder 
      * @return numero di sotto folder
      */
+    @Override
     public long getFoldersTotal() {
         return foldersTotal;
     }
@@ -58,6 +59,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Imposta il numero complessivo di sotto folder
      * @param foldersTotal numero di sottofolder
      */
+    @Override
     public void setFoldersTotal(long foldersTotal) {
         this.foldersTotal = foldersTotal;
     }
@@ -66,6 +68,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Restituisce il numero totale dei files nel backup
      * @return numero files del backup
      */
+    @Override
     public long getFilesTotal() {
         return filesTotal;
     }
@@ -74,6 +77,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Imposta il numero complessivo dei files del backup
      * @param filesTotal numero di files del backup
      */
+    @Override
     public void setFilesTotal(long filesTotal) {
         this.filesTotal = filesTotal;
     }
@@ -114,6 +118,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Restituisce la dimensione totale dei files del folder e dei sottofolder 
      * @return dimensione
      */
+    @Override
     public long getSizeTotal() {
         return sizeTotal;
     }
@@ -122,6 +127,7 @@ public class BackupNodeInformation extends NodeInformation implements Collection
      * Imposta la dimensione totale dei files del folder e dei sottofolder
      * @param sizeTotal dimensione
      */
+    @Override
     public void setSizeTotal(long sizeTotal) {
         this.sizeTotal = sizeTotal;
     }

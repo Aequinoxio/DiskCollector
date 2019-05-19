@@ -13,7 +13,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
- *
+ * Classe per renderizzare i vadi nodi del tree
  * @author utente
  *
  * Seen https://www.logicbig.com/tutorials/java-swing/jtree-renderer.html
@@ -31,7 +31,7 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     private final ImageIcon folderIconOpen;
 
     /**
-     *
+     * Costruttore
      */
     public NodeCellRenderer() {
         mainIcon = new ImageIcon(NodeCellRenderer.class.getResource("/images/Settings-Backup-Sync-icon_32.png"));
@@ -41,7 +41,8 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     }
 
     /**
-     *
+     * Metodo per il rendering dei vari nodi
+     * 
      * @param tree
      * @param value
      * @param sel
@@ -57,29 +58,29 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
         super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         NodeInformation userObject = (NodeInformation) node.getUserObject();
-
+        String text;
         if (null == userObject.getType()) {
             // Non dovrebbe mai arrivarci
-            String text = String.format(SPAN_FORMAT, "red", userObject);
+            text = String.format(SPAN_FORMAT, "red", userObject);
             this.setText("<html>" + text + "</html>");
         } else // Rendering
         {
+            // il costrutto (sel ? "white":"blue") permette di mettere white tutti i nodi 
             switch (userObject.getType()) {
                 case BACKUP: {
 
-                    String text = String.format(SPAN_FORMAT_BACKUP, "blue", userObject.getDisplayString());
-                    //text += " [" + String.format(SPAN_FORMAT, "orange", userObject.getRole()) + "]";
+                    text = String.format(SPAN_FORMAT_BACKUP, (sel ? "white" : "blue"), userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     this.setIcon(backupTextIcon);
                     break;
                 }
                 case FILE: {
-                    String text = String.format(SPAN_FORMAT, "green", userObject.getDisplayString());
+                    text = String.format(SPAN_FORMAT, (sel ? "white" : "green"), userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     break;
                 }
                 case FOLDER: {
-                    String text = String.format(SPAN_FORMAT_FOLDER, "green", userObject.getDisplayString());
+                    text = String.format(SPAN_FORMAT_FOLDER, (sel ? "white" : "green"), userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     if (expanded) {
                         this.setIcon(folderIconOpen);
@@ -90,14 +91,14 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
                 }
 
                 case ROOT: {
-                    String text = String.format(SPAN_FORMAT_ROOT, "blue", userObject.getDisplayString());
+                    text = String.format(SPAN_FORMAT_ROOT, (sel ? "white" : "blue"), userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     this.setIcon(mainIcon);
                     break;
                 }
 
                 default: {
-                    String text = String.format(SPAN_FORMAT, "red", userObject.getDisplayString());
+                    text = String.format(SPAN_FORMAT, (sel ? "white" : "red"), userObject.getDisplayString());
                     this.setText("<html>" + text + "</html>");
                     break;
                 }

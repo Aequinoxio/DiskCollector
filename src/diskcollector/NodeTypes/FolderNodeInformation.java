@@ -55,8 +55,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * @param path
      */
     public FolderNodeInformation(String string, Path path) {
-        super(string, NodeType.FOLDER);
-        //this.path = path.toString();
+        super(string, path, NodeType.FOLDER);       
     }
 
     /**
@@ -112,6 +111,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Restituisce il numero dei files totali di tutti i sottofolder 
      * @return numrero totale dei files
      */
+    @Override
     public long getFilesTotal() {
         return filesTotal;
     }
@@ -120,6 +120,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Imposta il numero dei files totali di tutti i sottofolder 
      * @param filesTotal numero totale dei files
      */
+    @Override
     public void setFilesTotal(long filesTotal) {
         this.filesTotal = filesTotal;
     }
@@ -128,6 +129,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Restituisce la dimensione totale dei files del folder e dei sottofolder 
      * @return dimensione
      */
+    @Override
     public long getSizeTotal() {
         return sizeTotal;
     }
@@ -136,6 +138,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Imposta la dimensione totale dei files del folder e dei sottofolder
      * @param sizeTotal dimensione
      */
+    @Override
     public void setSizeTotal(long sizeTotal) {
         this.sizeTotal = sizeTotal;
     }
@@ -144,6 +147,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Restituisce il numero complessivo dei sotto folder 
      * @return numero di sotto folder
      */
+    @Override
     public long getFoldersTotal() {
         return foldersTotal;
     }
@@ -152,6 +156,7 @@ public class FolderNodeInformation extends FilesystemNodeInformation implements 
      * Imposta il numero complessivo di sotto folder
      * @param foldersTotal numero di sottofolder
      */
+    @Override
     public void setFoldersTotal(long foldersTotal) {
         this.foldersTotal = foldersTotal;
     }

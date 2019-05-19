@@ -13,7 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
- *
+ * Dialog per la gestione del log dello SwingWorker durante il caricamento
+ * 
  * @author utente
  */
 public class DlgSwingWorkerLog extends javax.swing.JDialog {

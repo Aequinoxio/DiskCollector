@@ -15,7 +15,7 @@ public class EmptyNodeInformation extends NodeInformation{
      * Costruttore di default
      */
     public EmptyNodeInformation() {
-        super("-- VUOTO --",NodeType.EMPTY_PLACEHOLDER); // TODO: cercare una stringa migliore
+        super("-- EMPTY --",NodeType.EMPTY_PLACEHOLDER); // TODO: cercare una stringa migliore
     }
 
     /**

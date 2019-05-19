@@ -5,6 +5,7 @@
  */
 package diskcollector.UI;
 
+import diskcollector.Constants;
 import diskcollector.Worker.FilesystemActionWorker;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -23,7 +24,7 @@ public class DlgFilesystemAction extends javax.swing.JDialog {
     boolean isReadOperation;
     
     /**
-     * Creates new form DlgFylesystemAction
+     * Crea una dialog per gestire le azioni sul filesystem
      *
      * @param parent container padre
      * @param modal true se la dialog deve essere modale
@@ -38,7 +39,11 @@ public class DlgFilesystemAction extends javax.swing.JDialog {
         initComponents();
         
         if (isReadOperation){
-            lblAction.setText("Load file");
+            StringBuilder msg=new StringBuilder("Carico il file");
+            if (Constants.getInstance().getUserPassword()!=null){
+                msg.append(" e provo ad usare automaticamente la password.");
+            } 
+            lblAction.setText(msg.toString());
             m_msg="Sto ancora caricando. Annullo il caricamento?";
         } else {
             lblAction.setText("Save file");            
@@ -59,7 +64,9 @@ public class DlgFilesystemAction extends javax.swing.JDialog {
 
     }
 
-    
+    /**
+     *
+     */
     public void startWorkerAndShowDialog() {
         actionWorker.execute();
         this.setVisible(true);
@@ -114,7 +121,7 @@ public class DlgFilesystemAction extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblAction)
+                .addComponent(lblAction, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

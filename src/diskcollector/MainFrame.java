@@ -1,12 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package diskcollector;
 
-import diskcollector.Worker.FilesystemActionWorker;
-import diskcollector.Worker.FolderTreeReaderWorker;
 import diskcollector.NodeTypes.BackupNodeInformation;
 import diskcollector.NodeTypes.CollectionNodeInformation;
 import diskcollector.NodeTypes.FileNodeInformation;
@@ -16,15 +9,20 @@ import diskcollector.NodeTypes.NodeInformation;
 import diskcollector.NodeTypes.NodeType;
 import diskcollector.UI.DlgAbout;
 import diskcollector.UI.DlgFilesystemAction;
+import diskcollector.UI.DlgSearchAllResults;
 import diskcollector.UI.DlgSwingWorkerLog;
+import diskcollector.UI.RequestFocusListener;
+import diskcollector.Worker.FilesystemActionWorker;
+import diskcollector.Worker.FolderTreeReaderWorker;
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +35,8 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.TreeSelectionEvent;
@@ -55,13 +55,49 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
     DefaultMutableTreeNode m_selectedNode; // Nodo selezionato nel jtree
     private Enumeration m_searchingNodes;  // Enumeration per la ricerca, viene messo a null ogni volta che c'è una modifica sui dati dell'albero
-    private final String latestDBSaveParh = "";
+    //private final String latestDBSaveParh = "";
+
+    private String m_msgStatusBarDB;
+    private String m_msgStatusBarUserPassword;
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
+
+        if (Constants.getInstance().isDBEncrypted()) {
+            m_msgStatusBarDB = "Il DB verrà salvato crittografato";
+        } else {
+            m_msgStatusBarDB = "Il DB non verrà salvato crittografato";
+        }
+
+        if (Constants.getInstance().getUserPassword() != null) {
+            m_msgStatusBarUserPassword = "La password è impostata.";
+        } else {
+            m_msgStatusBarUserPassword = "La password non è impostata.";
+        }
+
+        updateStatusBar(null);
+
+        mnuEncryptDB.setSelected(Constants.getInstance().isDBEncrypted());
+
+        mnuEncryptDB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                if (mnuEncryptDB.isSelected()) {
+                    Constants.getInstance().setDBEncrypted(true);
+                } else {
+                    Constants.getInstance().setDBEncrypted(false);
+                }
+
+                m_msgStatusBarDB = Constants.getInstance().isDBEncrypted()
+                        ? "Il Database verrà cifrato al salvataggio"
+                        : "Il Database non verrà cifrato";
+
+                updateStatusBar(null);
+            }
+        });
 
         //UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
         // Inizializzo il tree
@@ -70,6 +106,9 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         directoryTree.setModel(defaultTreeModel);
         directoryTree.addTreeSelectionListener(this);
         directoryTree.setCellRenderer(new NodeCellRenderer());
+        NodeCellRenderer renderer = (NodeCellRenderer) directoryTree.getCellRenderer();
+        renderer.setTextSelectionColor(Color.white);
+
         // Uso la stessa azione del bottone cerca quando premo invio
         txtSearchText.addActionListener(this::btnSearchActionPerformed);
     }
@@ -83,6 +122,8 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        popMenu = new javax.swing.JPopupMenu();
+        popMnuRename = new javax.swing.JMenuItem();
         btnDeleteNodeTree = new javax.swing.JButton();
         btnDeleteNodeTre = new javax.swing.JButton();
         txtSearchText = new javax.swing.JTextField();
@@ -97,16 +138,43 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         btnLoadTree = new javax.swing.JButton();
         btnNewBackup = new javax.swing.JButton();
         btnInsertNodeTree = new javax.swing.JButton();
+        pnlStatusBar = new javax.swing.JPanel();
+        lblStatusBar = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        lblDBSavedType = new javax.swing.JLabel();
+        lblPasswordSet = new javax.swing.JLabel();
+        btnSearchAll = new javax.swing.JButton();
+        ckbUppercaseOnly = new javax.swing.JCheckBox();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        mnuFile = new javax.swing.JMenu();
+        mnuSaveDB = new javax.swing.JMenuItem();
         mnuLoadDB = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        mnuEncryptDB = new javax.swing.JCheckBoxMenuItem();
+        mnuSetPassword = new javax.swing.JMenuItem();
+        mnuEdit = new javax.swing.JMenu();
+        mnuNewBackupSet = new javax.swing.JMenuItem();
+        mnuModifyBackupSet = new javax.swing.JMenuItem();
+        mnuDeleteBackupset = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        mnuInsertTree = new javax.swing.JMenuItem();
+        mnuDeleteTree = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mnuDeleteAll = new javax.swing.JMenuItem();
         mnu2About = new javax.swing.JMenu();
         mitmAbout = new javax.swing.JMenuItem();
 
+        popMnuRename.setText("Rinomina e aggiorna");
+        popMnuRename.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                popMnuRenameActionPerformed(evt);
+            }
+        });
+        popMenu.add(popMnuRename);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(930, 730));
-        setPreferredSize(new java.awt.Dimension(930, 800));
+        setMinimumSize(new java.awt.Dimension(970, 800));
+        setPreferredSize(new java.awt.Dimension(970, 800));
 
         btnDeleteNodeTree.setText("Cancella ramo");
         btnDeleteNodeTree.addActionListener(new java.awt.event.ActionListener() {
@@ -149,6 +217,12 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         jScrollPane1.setMinimumSize(new java.awt.Dimension(500, 580));
         jScrollPane1.setPreferredSize(new java.awt.Dimension(500, 580));
+
+        directoryTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                directoryTreeMouseReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(directoryTree);
 
         jSplitPane1.setLeftComponent(jScrollPane1);
@@ -191,25 +265,161 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         });
 
-        jMenu1.setText("File");
+        pnlStatusBar.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4), javax.swing.BorderFactory.createEtchedBorder()));
 
-        mnuLoadDB.setText("Salva tutto il DB");
+        lblStatusBar.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        lblStatusBar.setOpaque(true);
+
+        javax.swing.GroupLayout pnlStatusBarLayout = new javax.swing.GroupLayout(pnlStatusBar);
+        pnlStatusBar.setLayout(pnlStatusBarLayout);
+        pnlStatusBarLayout.setHorizontalGroup(
+            pnlStatusBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStatusBarLayout.createSequentialGroup()
+                .addComponent(lblStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
+        );
+        pnlStatusBarLayout.setVerticalGroup(
+            pnlStatusBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lblStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4), javax.swing.BorderFactory.createEtchedBorder()));
+
+        lblDBSavedType.setBackground(java.awt.Color.red);
+        lblDBSavedType.setToolTipText("Il DB verrà cifrato al salvataggio?");
+        lblDBSavedType.setOpaque(true);
+        lblDBSavedType.setPreferredSize(new java.awt.Dimension(15, 15));
+
+        lblPasswordSet.setBackground(java.awt.Color.red);
+        lblPasswordSet.setForeground(java.awt.Color.lightGray);
+        lblPasswordSet.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblPasswordSet.setToolTipText("La password per salvare o aprire il DB cifrato è impostata?");
+        lblPasswordSet.setMaximumSize(new java.awt.Dimension(15, 15));
+        lblPasswordSet.setMinimumSize(new java.awt.Dimension(5, 5));
+        lblPasswordSet.setOpaque(true);
+        lblPasswordSet.setPreferredSize(new java.awt.Dimension(15, 15));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblPasswordSet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblDBSavedType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblPasswordSet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblDBSavedType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        btnSearchAll.setText("Cerca tutto");
+        btnSearchAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchAllActionPerformed(evt);
+            }
+        });
+
+        ckbUppercaseOnly.setText("Maiuscole");
+        ckbUppercaseOnly.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ckbUppercaseOnlyActionPerformed(evt);
+            }
+        });
+
+        mnuFile.setText("File");
+
+        mnuSaveDB.setText("Salva tutto il DB");
+        mnuSaveDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuSaveDBActionPerformed(evt);
+            }
+        });
+        mnuFile.add(mnuSaveDB);
+
+        mnuLoadDB.setText("Carica DB");
         mnuLoadDB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuLoadDBActionPerformed(evt);
             }
         });
-        jMenu1.add(mnuLoadDB);
+        mnuFile.add(mnuLoadDB);
+        mnuFile.add(jSeparator3);
 
-        jMenuItem2.setText("Carica DB");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+        mnuEncryptDB.setSelected(true);
+        mnuEncryptDB.setText("DB Cifrato");
+        mnuFile.add(mnuEncryptDB);
+
+        mnuSetPassword.setText("Imposta password");
+        mnuSetPassword.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem2ActionPerformed(evt);
+                mnuSetPasswordActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItem2);
+        mnuFile.add(mnuSetPassword);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(mnuFile);
+
+        mnuEdit.setText("Edit");
+
+        mnuNewBackupSet.setText("Nuovo backup set");
+        mnuNewBackupSet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNewBackupActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuNewBackupSet);
+
+        mnuModifyBackupSet.setText("Modifica backup set");
+        mnuModifyBackupSet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                popMnuRenameActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuModifyBackupSet);
+
+        mnuDeleteBackupset.setText("Cancella backup set");
+        mnuDeleteBackupset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteNodeTreActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuDeleteBackupset);
+        mnuEdit.add(jSeparator2);
+
+        mnuInsertTree.setText("Inserisci ramo");
+        mnuInsertTree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInsertNodeTreeActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuInsertTree);
+
+        mnuDeleteTree.setText("Cancella ramo");
+        mnuDeleteTree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteNodeTreeActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuDeleteTree);
+        mnuEdit.add(jSeparator1);
+
+        mnuDeleteAll.setText("Cancella tutto");
+        mnuDeleteAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewLogActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuDeleteAll);
+
+        jMenuBar1.add(mnuEdit);
 
         mnu2About.setText("About");
 
@@ -234,23 +444,34 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnNewBackup)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteNodeTre)
+                        .addComponent(pnlStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
-                        .addComponent(btnInsertNodeTree)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteNodeTree)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnViewLog)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 166, Short.MAX_VALUE)
-                        .addComponent(btnSaveTree)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLoadTree))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(txtSearchText)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnNewBackup)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnDeleteNodeTre)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnInsertNodeTree)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnDeleteNodeTree)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnViewLog))
+                            .addComponent(txtSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, 677, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSearch)))
+                        .addComponent(ckbUppercaseOnly)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(btnSearch)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearchAll))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnSaveTree)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnLoadTree)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -268,9 +489,15 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch))
+                    .addComponent(btnSearch)
+                    .addComponent(btnSearchAll)
+                    .addComponent(ckbUppercaseOnly))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 624, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlStatusBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -348,20 +575,20 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         ((DefaultTreeModel) directoryTree.getModel()).reload();
-        m_searchingNodes = null;
+        m_searchingNodes = null; // reimposto il nodo di ricerca in modo da ricominciare da capo
 
         return true;
     }
 
     private void btnDeleteNodeTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteNodeTreeActionPerformed
-       
+
         deleteSubTree();
 
-        m_searchingNodes = null; 
+        m_searchingNodes = null; // reimposto il nodo di ricerca in modo da ricominciare da capo
     }//GEN-LAST:event_btnDeleteNodeTreeActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        DefaultMutableTreeNode node = searchNode(txtSearchText.getText());
+        DefaultMutableTreeNode node = searchNode(txtSearchText.getText(), ckbUppercaseOnly.isSelected());
         if (node != null) {
             TreeNode[] nodes = ((DefaultTreeModel) directoryTree.getModel()).getPathToRoot(node);
             TreePath path = new TreePath(nodes);
@@ -371,12 +598,15 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         } else {
             JOptionPane.showMessageDialog(this, "Non ho trovato nulla", "Ricerca", JOptionPane.WARNING_MESSAGE);
             m_searchingNodes = null;
-            //System.out.println("Node with string " + txtSearchText.getText() + " not found");
         }
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnSaveTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveTreeActionPerformed
-        saveTheTree();
+        if (Constants.getInstance().getUserPassword() == null && Constants.getInstance().isDBEncrypted()) {
+            JOptionPane.showMessageDialog(this, "Non posso salvare il DB cifrato senza una password impostata", "Attenzione", JOptionPane.OK_OPTION);
+        } else {
+            saveTheTree();
+        }
     }//GEN-LAST:event_btnSaveTreeActionPerformed
 
     private void btnLoadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTreeActionPerformed
@@ -384,7 +614,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }//GEN-LAST:event_btnLoadTreeActionPerformed
 
     private void btnViewLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewLogActionPerformed
-        int val = JOptionPane.showConfirmDialog(this, "Conferma", "Cancello tutto?", JOptionPane.OK_CANCEL_OPTION);
+        int val = JOptionPane.showConfirmDialog(this, "Cancello tutto?", "Conferma", JOptionPane.OK_CANCEL_OPTION);
         if (val != JOptionPane.OK_OPTION) {
             return;
         }
@@ -397,15 +627,17 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         // Personalizzo la dialog
         JTextField txtBackupSetName = new JTextField();
+        txtBackupSetName.addAncestorListener(new RequestFocusListener()); // Focus su questo campo
+
         JTextArea txtBackupSetDescription = new JTextArea(10, 50);
-        //JPasswordField password = new JPasswordField();
+        JScrollPane backupDescScroll = new JScrollPane(txtBackupSetDescription);
         final JComponent[] inputs = new JComponent[]{
-            new JLabel("Nome Backup Set"),
+            new JLabel("Nome Backup Set :"),
             txtBackupSetName,
-            new JLabel("Descrizione Backup Set"),
-            txtBackupSetDescription
+            new JLabel("Descrizione Backup Set :"),
+            backupDescScroll
         };
-        int result = JOptionPane.showConfirmDialog(this, inputs, "Inserimendo dati Backup Set", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, inputs, "Inserimendo dati Backup Set", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         String nome;
         String desc;
@@ -426,9 +658,21 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         BackupNodeInformation backupNodeInformation = new BackupNodeInformation(nome, desc);
         backupNodeInformation.setRetrievingDate(new Date(LocalDate.now().toEpochDay())); // TODO: trucchetto da verificare meglio come gestirlo
 
-        defaultMutableTreeNode.add(new DefaultMutableTreeNode(backupNodeInformation));
+        DefaultMutableTreeNode newBackupNode = new DefaultMutableTreeNode(backupNodeInformation);
+        defaultMutableTreeNode.add(newBackupNode);
 
+        // Mostro il nuovo backupset appena creato
+        m_selectedNode = newBackupNode;
         ((DefaultTreeModel) directoryTree.getModel()).reload();
+        TreeNode[] treeNodes = ((DefaultTreeModel) directoryTree.getModel()).getPathToRoot(newBackupNode);
+        TreePath treePath = new TreePath(treeNodes);
+        directoryTree.setSelectionPath(treePath);
+        directoryTree.scrollPathToVisible(treePath);
+        directoryTree.expandPath(treePath);
+
+        displayDetails(m_selectedNode);
+
+
     }//GEN-LAST:event_btnNewBackupActionPerformed
 
     private void btnDeleteNodeTreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteNodeTreActionPerformed
@@ -440,15 +684,14 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         try {
             TreePath tp = directoryTree.getSelectionPath();
             if (insertSubTree()) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
-//                BackupNodeInformation backupNodeInformation = (BackupNodeInformation) node.getUserObject();
+                //DefaultMutableTreeNode node = (DefaultMutableTreeNode) directoryTree.getLastSelectedPathComponent();
 
                 // Aggiorno e visualizzo il jtree
                 directoryTree.setSelectionPath(tp);
                 directoryTree.scrollPathToVisible(tp);
                 directoryTree.expandPath(tp);
             }
-            
+
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -461,17 +704,159 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
     }//GEN-LAST:event_mitmAboutActionPerformed
 
-    private void mnuLoadDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLoadDBActionPerformed
+    private void mnuSaveDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSaveDBActionPerformed
         saveTheTree();
-    }//GEN-LAST:event_mnuLoadDBActionPerformed
+    }//GEN-LAST:event_mnuSaveDBActionPerformed
 
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+    private void mnuLoadDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLoadDBActionPerformed
         openTheTree();
-    }//GEN-LAST:event_jMenuItem2ActionPerformed
+    }//GEN-LAST:event_mnuLoadDBActionPerformed
 
     private void txtSearchTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchTextFocusGained
 //        txtSearchText.setText("");
     }//GEN-LAST:event_txtSearchTextFocusGained
+
+    private void mnuSetPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSetPasswordActionPerformed
+        JLabel label_password = new JLabel("Password:");
+        JPasswordField password = new JPasswordField();
+        password.addAncestorListener(new RequestFocusListener());
+
+        Object[] array = {label_password, password};
+        String[] buttonMessages = new String[]{"Imposta", "Dimentica", "Annulla"};
+        int res = JOptionPane.showOptionDialog(this, array, "Imposta password",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                buttonMessages,
+                buttonMessages[2]
+        );
+
+        switch (res) {
+            case JOptionPane.YES_OPTION:
+                Constants.getInstance().setUserPassword(password.getPassword());
+                m_msgStatusBarUserPassword = "Password impostata";
+                break;
+            case JOptionPane.NO_OPTION:
+                Constants.getInstance().setUserPassword(null);
+                m_msgStatusBarUserPassword = "Password dimenticata";
+                break;
+            default:
+                // Se annullo esco senza aggiornare nulla
+                return;
+        }
+
+        updateStatusBar(null);
+    }//GEN-LAST:event_mnuSetPasswordActionPerformed
+
+    private void btnSearchAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchAllActionPerformed
+        ArrayList<DefaultMutableTreeNode> results = searchAllNodes(txtSearchText.getText(), ckbUppercaseOnly.isSelected());
+        if (results.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Non ho trovato nulla", "Ricerca", JOptionPane.WARNING_MESSAGE);
+            m_searchingNodes = null;
+            return;
+        }
+        DlgSearchAllResults dlgSearchAllResults = new DlgSearchAllResults(this, false, directoryTree);
+        dlgSearchAllResults.setLocationRelativeTo(this);
+        dlgSearchAllResults.setSearchResults(results);
+        dlgSearchAllResults.setVisible(true);
+    }//GEN-LAST:event_btnSearchAllActionPerformed
+
+    private void popMnuRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_popMnuRenameActionPerformed
+        if (((NodeInformation) m_selectedNode.getUserObject()).getType() == NodeType.BACKUP) {
+            BackupNodeInformation backupNode = (BackupNodeInformation) m_selectedNode.getUserObject();
+
+            JTextField displayString = new JTextField(backupNode.getDisplayString());
+            JTextArea details = new JTextArea(backupNode.getDetails(), 10, 40);
+            JScrollPane detailsScrollPane = new JScrollPane(details);
+
+            // Mi sembra più efficiente questa impostazione che quella nel btnNewBackupActionPerformed
+            Object[] message = {
+                "Nome Backup Set :", displayString,
+                "Descrizione Backup Set :", detailsScrollPane
+            };
+
+            // Dialog per l'aggiornamento
+            int option = JOptionPane.showConfirmDialog(this, message, "Aggiorna", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (option == JOptionPane.OK_OPTION) {
+                backupNode.setDisplayString(displayString.getText().trim());
+                backupNode.setDetails(details.getText().trim());
+
+                // Ricarica il tree salvando lo stato di apertura                
+                Enumeration<TreePath> openTreePath = directoryTree.getExpandedDescendants(
+                        new TreePath(directoryTree.getModel().getRoot()));
+
+                ((DefaultTreeModel) directoryTree.getModel()).reload(m_selectedNode);
+                displayDetails(m_selectedNode);
+
+                // Ripristina i path aperti
+                while (openTreePath.hasMoreElements()) {
+                    directoryTree.expandPath(openTreePath.nextElement());
+                }
+
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Scegliere un nodo di backup set", "Attenzione", JOptionPane.OK_OPTION);
+        }
+    }//GEN-LAST:event_popMnuRenameActionPerformed
+
+    private void directoryTreeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_directoryTreeMouseReleased
+        if (evt.isPopupTrigger()) {
+            int row = directoryTree.getClosestRowForLocation(evt.getX(), evt.getY());
+            directoryTree.setSelectionRow(row);
+            m_selectedNode = (DefaultMutableTreeNode) directoryTree.getSelectionPath().getLastPathComponent();
+            popMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+    }//GEN-LAST:event_directoryTreeMouseReleased
+
+    private void ckbUppercaseOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckbUppercaseOnlyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ckbUppercaseOnlyActionPerformed
+
+    /**
+     * Aggiorna la status bar
+     *
+     * @param statusBarText stringa da mostrare. Se null mostro la
+     * concatenazione di sue stringhe di classe: DB cifrato e set password
+     */
+    private void updateStatusBar(String statusBarText) {
+        // Aggiorno la status bar secondo questa logica:
+        //      DBCifrato = true e password impostata: verde
+        //      DBCifrato = true e password non impostata: arancione
+        //      DBCifrato = false e password impostata: arancione
+        //      DBCifrato = false e paspassword non impostata: rosso
+
+        boolean isDBEncrypted = Constants.getInstance().isDBEncrypted();
+        boolean isUserPasswordSet = Constants.getInstance().getUserPassword() != null;
+        lblStatusBar.setForeground(Color.BLACK);
+        if (isDBEncrypted && isUserPasswordSet) {
+            lblStatusBar.setBackground(Color.GREEN);
+        } else if ((!isDBEncrypted && isUserPasswordSet) || (isDBEncrypted && !isUserPasswordSet)) {
+            lblStatusBar.setBackground(Color.ORANGE);
+        } else if (!isDBEncrypted && !isUserPasswordSet) {
+            lblStatusBar.setBackground(Color.RED);
+            lblStatusBar.setForeground(Color.WHITE);
+        }
+
+        if (statusBarText == null) {
+            statusBarText = m_msgStatusBarDB + " - " + m_msgStatusBarUserPassword;
+        }
+        lblStatusBar.setText(statusBarText);
+
+        if (isUserPasswordSet) {
+            lblPasswordSet.setBackground(Color.GREEN);
+        } else {
+            lblPasswordSet.setBackground(Color.RED);
+        }
+
+        if (isDBEncrypted) {
+            lblDBSavedType.setBackground(Color.GREEN);
+            lblDBSavedType.setForeground(Color.BLACK);
+        } else {
+            lblDBSavedType.setBackground(Color.RED);
+            lblDBSavedType.setForeground(Color.LIGHT_GRAY);
+        }
+
+    }
 
     /**
      * Cancella il subTree selezionato
@@ -517,13 +902,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             nodeSibling = (DefaultMutableTreeNode) node.getParent();
         }
 
-        updateParentNode((DefaultMutableTreeNode) treeNodeParent, (DefaultMutableTreeNode) node);
+        updateParentNode((DefaultMutableTreeNode) treeNodeParent, node);
 
         // Ok a questo punto posso cancellare il nodo
         node.removeFromParent();
 
         ((DefaultTreeModel) directoryTree.getModel()).reload(treeNodeParent);
-        m_searchingNodes = null; 
+        m_searchingNodes = null;
 
         // Espando il fratello, visto che recupero comunque il nodo padre dovrei sempre passare l'if
         if (nodeSibling != null) {
@@ -536,28 +921,21 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
     private void updateParentNode(DefaultMutableTreeNode parentTreeNode, DefaultMutableTreeNode actualTreeNode) {
         NodeType nt = ((NodeInformation) actualTreeNode.getUserObject()).getType();
-// Calcolo i parametri da aggiornare
-//        long filesTotal = 0;
-//        long foldersTotal = 0;
-//        long sizeTotal = 0;
 
         switch (nt) {
             case FOLDER:
             case BACKUP:
-                CollectionNodeInformation ob = (CollectionNodeInformation) actualTreeNode.getUserObject();
-                //FolderNodeInformation ob1 = (FolderNodeInformation) node.getUserObject();
-//                filesTotal = ob.getFilesTotal();
-//                foldersTotal = ob.getFoldersTotal();
-//                sizeTotal = ob.getSizeTotal();
-                
+                //CollectionNodeInformation ob = (CollectionNodeInformation) actualTreeNode.getUserObject();
+
                 TreeNode[] nodePath = actualTreeNode.getPath();
-                // Ciclare dal secondo nodo al penultimo: il primo è la root mentre l'ultimo è il nodo da cancellare
                 long filesTotalTemp = 0;
                 long foldersTotalTemp = 0;
                 long sizeTotalTemp = 0;
+
+                // Variabili temporanee per aggiornare i nodi superiori
                 DefaultMutableTreeNode nodeTemp;
-                CollectionNodeInformation cniTemp;
-                nodeTemp = (DefaultMutableTreeNode) nodePath[nodePath.length - 1];
+                CollectionNodeInformation cniTemp; // Nodo generico di una collezione (folder o backup set)
+                nodeTemp = (DefaultMutableTreeNode) nodePath[nodePath.length - 1]; // Nodo padre???
                 cniTemp = (CollectionNodeInformation) nodeTemp.getUserObject();
 
                 filesTotalTemp = cniTemp.getFilesTotal();
@@ -566,6 +944,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
                 CollectionNodeInformation cniTempParent;
                 DefaultMutableTreeNode nodeTempParent;
+                // Ciclo dal secondo nodo al penultimo: il primo è la root mentre l'ultimo è il nodo da cancellare
                 for (int i = nodePath.length - 2; i >= 1; i--) { // Salto il primo e l'ultimo livello (Nodo Radice e foglia da cancellare risoettivamente)
                     nodeTempParent = (DefaultMutableTreeNode) nodePath[i];
                     cniTempParent = (CollectionNodeInformation) nodeTempParent.getUserObject();
@@ -574,11 +953,10 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                     cniTempParent.setSizeTotal(cniTempParent.getSizeTotal() - sizeTotalTemp);
                 }
 
-                // Aggiorno il nodo padre
-                //DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) parentTreeNode;
+                // Aggiorno il nodo padre                
                 NodeInformation parentNode = (NodeInformation) parentTreeNode.getUserObject();
 
-                // Verifico se sia un container (probabilmente p superfluo)
+                // Verifico se sia un container (probabilmente è superfluo)
                 switch (parentNode.getType()) {
                     case FOLDER:
                     case BACKUP:
@@ -597,7 +975,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 // Aggiorno le subdir dirette del parent
                 // PROBABILE BUG, se il nodo non è né folder né backup ho un problema (provo a chiamare il metodo comune tra backup node e filde rnode)
                 if (parentNode.getType() == NodeType.FOLDER) {
-                    //FolderNodeInformation folderNodeTemp = (FolderNodeInformation) parentTreeNode.getUserObject();
                     FolderNodeInformation folderNodeTemp = (FolderNodeInformation) parentNode; // Per comodità
                     folderNodeTemp.setFirstSubFolders(folderNodeTemp.getFirstSubFolders() - 1);
                 }
@@ -610,7 +987,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                         "Qualcosa è andato molto storto, il nodo da cancellare non è né un folder né un backup non faccio nulla",
                         "Attenzione",
                         JOptionPane.WARNING_MESSAGE);
-                return;
         }
 
     }
@@ -648,7 +1024,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }
 
     /**
-     * Recupera i dettagli e li mostra 
+     * Recupera i dettagli e li mostra
      *
      * @param e Evento
      */
@@ -663,12 +1039,20 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             return;
         }
 
+        displayDetails(node);
+    }
+
+    /**
+     * Mostra i dettagli nella textarea prevista
+     *
+     * @param node Nodo di cui mostrare i dettagli
+     */
+    private void displayDetails(DefaultMutableTreeNode node) {
         NodeInformation nodeInfo = (NodeInformation) node.getUserObject();
         m_selectedNode = node;
-        String fileDetails;
+
         StringBuilder sb = new StringBuilder();
 
-        // sb.append(nodeInfo.toString());
         if (node.isRoot()) {
             sb = sb.append(" << ROOT >>").append("\n");
         } else {
@@ -733,26 +1117,32 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             sb.append("Last access time: ").append(d.toString()).append("\n");
         }
 
-        fileDetails = sb.toString();
-        displayDetails(fileDetails);
-    }
-
-    private void displayDetails(String detail) {
-        txtDetails.setText(detail);
+        txtDetails.setText(sb.toString());
     }
 
     /**
+     * Cerca un nodo a partire dal pattern. Come effetto collaterale aggiorna
+     * una variabile di classe in modo da poter continuare la ricerca
+     * semplicemente invocando la funzione
      *
-     * @param nodeStr
-     * @return
+     * @param nodeStr Pattern di ricerca (regexp)
+     * @param caseSensitive True se il patter va cercato distinguendo tra
+     * maiuscole e miniscole, false altrimenti
+     * @return Noodo trovato.
      */
-    public DefaultMutableTreeNode searchNode(String nodeStr) {
+    private DefaultMutableTreeNode searchNode(String nodeStr, boolean caseSensitive) {
         DefaultMutableTreeNode node = null;
-        //Enumeration e = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
+
         if (m_searchingNodes == null || !m_searchingNodes.hasMoreElements()) {
             m_searchingNodes = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
         }
-        Pattern pattern = Pattern.compile(nodeStr);
+
+        Pattern pattern;
+        if (caseSensitive) {
+            pattern = Pattern.compile(nodeStr);
+        } else {
+            pattern = Pattern.compile(nodeStr, Pattern.CASE_INSENSITIVE);
+        }
         while (m_searchingNodes.hasMoreElements()) {
             node = (DefaultMutableTreeNode) m_searchingNodes.nextElement();
             Matcher matcher = pattern.matcher(node.getUserObject().toString());
@@ -762,9 +1152,49 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         }
         return null;
     }
-    
+
     /**
+     * Cerca il pattern in tutti i nodi
      *
+     * @param searchPattern pattern da cercare (regexp)
+     * @param caseSensitive true se il pattern va cercato rispettando le
+     * maiuscole/minuscole, false altrimenti
+     * @return ArrayList con tutti i nodi trovati o null se non ha trovato nulla
+     */
+    private ArrayList<DefaultMutableTreeNode> searchAllNodes(String searchPattern, boolean caseSensitive) {
+        DefaultMutableTreeNode node = null;
+
+// Cerco dalla root
+        //Enumeration searchingNodes = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
+// Cerco dall'ultimo nodo selezionato
+        Enumeration searchingNodes = null;
+
+        if (m_selectedNode == null) { // Se non selezioni nulla parto dalla root
+            searchingNodes = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
+        } else {
+            searchingNodes = m_selectedNode.depthFirstEnumeration();
+        }
+        ArrayList<DefaultMutableTreeNode> nodeInformations = new ArrayList<>();
+
+        Pattern pattern;
+        if (caseSensitive) {
+            pattern = Pattern.compile(searchPattern);
+        } else {
+            pattern = Pattern.compile(searchPattern, Pattern.CASE_INSENSITIVE);
+        }
+        while (searchingNodes.hasMoreElements()) {
+            node = (DefaultMutableTreeNode) searchingNodes.nextElement();
+            Matcher matcher = pattern.matcher(node.getUserObject().toString());
+            if (matcher.find()) {
+                nodeInformations.add(node);
+            }
+        }
+
+        return nodeInformations;
+    }
+
+    /**
+     * Salva il tree
      */
     public void saveTheTree() {
 
@@ -802,25 +1232,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
         TreeModel tm = directoryTree.getModel();   //tree is of type MyTree which extends JTree. It creates a tree from an XML document
 
-//        try {
-//            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(chooser.getSelectedFile().getAbsolutePath()))) {
-//                out.writeObject(tm);//the actual tree object
-//                out.flush();
-//            } //the actual tree object
-//        } catch (IOException e) {
-//            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
-//        }
         FilesystemActionWorker filesystemActionWorker = new FilesystemActionWorker(chooser.getSelectedFile().getAbsolutePath(), false);
         filesystemActionWorker.setObjectToWrite(tm);
 
         DlgFilesystemAction dlgFilesystemAction = new DlgFilesystemAction(this, true, filesystemActionWorker, false);
 
         dlgFilesystemAction.startWorkerAndShowDialog(); // Aspetto che il thread finisca
-//        try {
-//            filesystemActionWorker.get();
-//        } catch (InterruptedException | ExecutionException ex) {
-//            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+
         if (filesystemActionWorker.isCancelled()) {
             String msg = "Nessun file è stato salvato" + (toOverwrite ? ". Il file esistente è stato conservato" : "");
             JOptionPane.showMessageDialog(this, msg, "Attenzione", JOptionPane.OK_OPTION);
@@ -828,7 +1246,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     }
 
     /**
-     *
+     * Carica il tree
      */
     public void openTheTree() {
         JFileChooser chooser = new JFileChooser();
@@ -850,8 +1268,8 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         Constants.getInstance().setLatestSavePath(chooser.getSelectedFile().getParent());
         Constants.getInstance().setLatestSaveFilename(chooser.getSelectedFile().getName());
 
-        //latestDBSaveParh = chooser.getSelectedFile().getParent();
         m_searchingNodes = null; // reinizializzo la ricerca
+        m_selectedNode = null;
 
         try {
             TreeModel atm;
@@ -868,7 +1286,28 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
 
             atm = filesystemActionWorker.get(); // Recupero il treemodel            
-            if (atm == null) { // Se è nullo esco in quanto ci potrebbe essere stato un problema nel leggere il file
+            if (atm == null) { // Se è nullo esco in quanto ci potrebbe essere stato un problema nel leggere il file o decifrare il file
+                String msgDialog = null;
+                switch (filesystemActionWorker.getError()) {
+                    case WRONG_PASSWORD:
+                        msgDialog = "Errore nel decifrare il file, controlla la password";
+                        break;
+                    case ERROR_LOADING_CLASS:
+                        msgDialog = "Errore nel caricare l'oggetto serializzato";
+                        break;
+                    case ERROR_READING_FILE:
+                        msgDialog = "Errore nel caricare il file";
+                        break;
+                    case ERROR_WRITING_FILE:
+                        msgDialog = "Errore nel salvare il file";
+                        break;
+                    case IO_ERROR:
+                        msgDialog = "Errore IO";
+                        break;
+                }
+
+                JOptionPane.showMessageDialog(this, msgDialog, "Attenzione", JOptionPane.OK_OPTION);
+
                 return;
             }
 
@@ -882,7 +1321,8 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             directoryTree.setModel(atm);
             ((DefaultTreeModel) directoryTree.getModel()).reload();
 
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
+            JOptionPane.showMessageDialog(this, "Qualcosa è andato storto.\nSe hai provato a caricare un DB cifrato\naccertati di aver inserito la password corretta.", "Attenzione", JOptionPane.OK_OPTION);
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
         }
     }
@@ -894,17 +1334,38 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private javax.swing.JButton btnNewBackup;
     private javax.swing.JButton btnSaveTree;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSearchAll;
     private javax.swing.JButton btnViewLog;
+    private javax.swing.JCheckBox ckbUppercaseOnly;
     private javax.swing.JTree directoryTree;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JLabel lblDBSavedType;
+    private javax.swing.JLabel lblPasswordSet;
+    private javax.swing.JLabel lblStatusBar;
     private javax.swing.JMenuItem mitmAbout;
     private javax.swing.JMenu mnu2About;
+    private javax.swing.JMenuItem mnuDeleteAll;
+    private javax.swing.JMenuItem mnuDeleteBackupset;
+    private javax.swing.JMenuItem mnuDeleteTree;
+    private javax.swing.JMenu mnuEdit;
+    private javax.swing.JCheckBoxMenuItem mnuEncryptDB;
+    private javax.swing.JMenu mnuFile;
+    private javax.swing.JMenuItem mnuInsertTree;
     private javax.swing.JMenuItem mnuLoadDB;
+    private javax.swing.JMenuItem mnuModifyBackupSet;
+    private javax.swing.JMenuItem mnuNewBackupSet;
+    private javax.swing.JMenuItem mnuSaveDB;
+    private javax.swing.JMenuItem mnuSetPassword;
+    private javax.swing.JPanel pnlStatusBar;
+    private javax.swing.JPopupMenu popMenu;
+    private javax.swing.JMenuItem popMnuRename;
     private javax.swing.JTextArea txtDetails;
     private javax.swing.JTextField txtSearchText;
     // End of variables declaration//GEN-END:variables
