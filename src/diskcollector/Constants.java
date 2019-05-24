@@ -17,10 +17,12 @@ public class Constants {
 
     // Preference keys for this package
     static final String ROOT_STRING = "Backup disponibili";
+    static final String LOGFILENAME = "DiskCollector_logger.log";
     private static final String SAVED_PATH = "SAVED_PATH";
     private static final String SAVED_FILENAME = "SAVED_FILENAME";
-    private static final String DBEncryptedKEY = "DBENCRYPTED";
-    private static final Preferences prefs = Preferences.userNodeForPackage(Constants.class);
+    private static final String DBENCRYPTEDKEY = "DBENCRYPTED";
+    private static final Preferences PREFS = Preferences.userNodeForPackage(Constants.class);
+    
     /**
      * Istanza del Singleton
      *
@@ -40,7 +42,7 @@ public class Constants {
     private char[] userPassword;
 
     private Constants() {
-        DBEncrypted = prefs.getBoolean(DBEncryptedKEY, true);
+        DBEncrypted = PREFS.getBoolean(DBENCRYPTEDKEY, true);
     }
 
 // TODO: Molto brutto, usare uno storage sicuro per non mostrarla in memoria in chiaro
@@ -71,7 +73,7 @@ public class Constants {
 
     public void setDBEncrypted(boolean DBEncrypted) {
         this.DBEncrypted = DBEncrypted;
-        prefs.putBoolean(DBEncryptedKEY, DBEncrypted);
+        PREFS.putBoolean(DBENCRYPTEDKEY, DBEncrypted);
     }
 
     public byte[] getSalt() {
@@ -89,7 +91,7 @@ public class Constants {
      * @return Stringa che rappresenta il path di salvataggio
      */
     public String getLatestSavePath() {
-        return prefs.get(SAVED_PATH, ".");
+        return PREFS.get(SAVED_PATH, ".");
     }
 
     /**
@@ -98,7 +100,7 @@ public class Constants {
      * @param savePath
      */
     public void setLatestSavePath(String savePath) {
-        prefs.put(SAVED_PATH, savePath);
+        PREFS.put(SAVED_PATH, savePath);
     }
 
     /**
@@ -107,7 +109,7 @@ public class Constants {
      * @return Stringa con l'ultimo savename usato. DB.txt è il default
      */
     public String getLatestSaveFilename() {
-        return prefs.get(SAVED_FILENAME, "DB.txt");
+        return PREFS.get(SAVED_FILENAME, "DB.txt");
     }
 
     /**
@@ -116,7 +118,7 @@ public class Constants {
      * @param saveFilename
      */
     public void setLatestSaveFilename(String saveFilename) {
-        prefs.put(SAVED_FILENAME, saveFilename);
+        PREFS.put(SAVED_FILENAME, saveFilename);
     }
 
     private static class ConstantsHolder {
