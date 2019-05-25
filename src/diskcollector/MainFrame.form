@@ -51,14 +51,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuSetPasswordActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuKeyLength">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Verifica max lunghezza chiave ammissibile"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuKeyLengthActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="mnuEncryptDB">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>
@@ -137,8 +129,13 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnViewLogActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
-            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="mnuTools">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Tools"/>
+          </Properties>
+          <SubComponents>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="mnuLogTofile">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>
@@ -156,6 +153,16 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuViewLogFileActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator7">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuKeyLength">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Verifica max lunghezza chiave ammissibile"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuKeyLengthActionPerformed"/>
+              </Events>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="mnuAbout">
@@ -163,12 +170,12 @@
             <Property name="text" type="java.lang.String" value="About"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="mitmAbout">
+            <MenuItem class="javax.swing.JMenuItem" name="mnuAboutItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="About"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mitmAboutActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuAboutItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -290,6 +297,7 @@
     <Component class="javax.swing.JButton" name="btnDeleteNodeTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cancella ramo"/>
+        <Property name="toolTipText" type="java.lang.String" value="Cancella il ramo selezionato"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDeleteNodeTreeActionPerformed"/>
@@ -298,6 +306,7 @@
     <Component class="javax.swing.JButton" name="btnDeleteNodeTre">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cancella Backup set"/>
+        <Property name="toolTipText" type="java.lang.String" value="Cancella il backup set selezionato"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDeleteNodeTreActionPerformed"/>
@@ -315,6 +324,7 @@
     <Component class="javax.swing.JButton" name="btnSearch">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cerca"/>
+        <Property name="toolTipText" type="java.lang.String" value="Cerca la prima ocorrenza nel sottoramo"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSearchActionPerformed"/>
@@ -323,6 +333,7 @@
     <Component class="javax.swing.JButton" name="btnViewLog">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cancella tutto"/>
+        <Property name="toolTipText" type="java.lang.String" value="Cancella tutti i backup sets ed i sottorami"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnViewLogActionPerformed"/>
@@ -399,6 +410,7 @@
     <Component class="javax.swing.JButton" name="btnSaveTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Salva DB"/>
+        <Property name="toolTipText" type="java.lang.String" value="Salva tutto il DB cifrandolo se &#xe8; stato specificato"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveTreeActionPerformed"/>
@@ -407,6 +419,7 @@
     <Component class="javax.swing.JButton" name="btnLoadTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Carica DB"/>
+        <Property name="toolTipText" type="java.lang.String" value="Carica il DB, se cifrato prova ad usare la password impostata"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoadTreeActionPerformed"/>
@@ -415,6 +428,7 @@
     <Component class="javax.swing.JButton" name="btnNewBackup">
       <Properties>
         <Property name="text" type="java.lang.String" value="Nuovo Backup set"/>
+        <Property name="toolTipText" type="java.lang.String" value="Inserisce un nuovo backup set"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNewBackupActionPerformed"/>
@@ -423,6 +437,7 @@
     <Component class="javax.swing.JButton" name="btnInsertNodeTree">
       <Properties>
         <Property name="text" type="java.lang.String" value="Inserisci ramo"/>
+        <Property name="toolTipText" type="java.lang.String" value="Inserisce un ramo nel backup set"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInsertNodeTreeActionPerformed"/>
@@ -553,6 +568,7 @@
     <Component class="javax.swing.JButton" name="btnSearchAll">
       <Properties>
         <Property name="text" type="java.lang.String" value="Cerca tutto"/>
+        <Property name="toolTipText" type="java.lang.String" value="Cerca in tutto il sottoramo"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSearchAllActionPerformed"/>

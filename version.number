@@ -1,0 +1,4 @@
+# Facility file defining major, minor e revision number. BY GAB
+major.version.number=1
+minor.version.number=1
+revision.version.number=2

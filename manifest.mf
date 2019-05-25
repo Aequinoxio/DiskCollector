@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Ant-Version: Apache Ant 1.10.4
 Created-By: 1.8.0_121-b13 (Oracle Corporation)
 Bundle-Name: DiskCollector
-Bundle-Version: 1.1
-Bundle-Date: 2019-05-24 06:53:34 CEST
+Bundle-Version: v1.1.2
+Bundle-Date: 2019-05-25 07:39:49 CEST
 Application-Title: DiskCollector
 Application-Vendor: utente
-Implementation-Version: 86
+Implementation-Version: 120
 Application-URL: https://www.example.com
 

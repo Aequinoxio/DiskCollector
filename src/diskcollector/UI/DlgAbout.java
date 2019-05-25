@@ -41,7 +41,8 @@ public class DlgAbout extends javax.swing.JDialog {
     private void loadAboutFile() {
         try {
 
-            URL aboutUrl = MainFrame.class.getResource("/AboutAndCredits.html");
+            //URL aboutUrl = MainFrame.class.getResource("/AboutAndCredits.html");
+            URL aboutUrl = this.getClass().getClassLoader().getResource("AboutAndCredits.html");
             File about = new File(aboutUrl.toURI());
 
             try (FileReader fr = new FileReader(about)) {

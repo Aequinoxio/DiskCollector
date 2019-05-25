@@ -72,14 +72,15 @@
     -->
     <target name="-pre-init">
         <property name="project.name" value="DiskCollector" />
-        <property name="major-version-number" value="1.1" />
+        <property file="version.number"/>
+        <property name="major-version-number" value="v${major.version.number}.${minor.version.number}.${revision.version.number}" />
         <tstamp>
             <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss z" />
-            <format property="NOW_FOR_FILE" pattern="yyyy-MM-dd HH_mm_ss z" />
+            <format property="NOW_FOR_FILE" pattern="yyyyMMdd-HHmmss" />
         </tstamp>
 
         <buildnumber />
-        <property name="version-number" value="${major-version-number}.${build.number}" />
+        <property name="version-number" value="${major-version-number}.r${build.number}" />
         
         <manifest file="MANIFEST.MF">
             <attribute name="Bundle-Name" value="${project.name}" />           
@@ -95,7 +96,7 @@
     </target>
     <!-- Add the version information to the jar, sign the jar and create
     create a copy of the jar containing the version number in the filename -->
-    <target name="-post-jar">
+    <target name="-post-jar" description="Generate the jars">
 
 
         <!--Sign the jar file with you credentials -->
@@ -106,11 +107,24 @@
         <property name="store.jar.name" value="${application.title}-AllInOne"/>
         <property name="store.dir" value="dist"/>
         <property name="store.jar" value="${store.dir}/${store.jar.name}.jar"/>
+        
+        <property file="version.number"/>
+        
         <echo message="Packaging ${application.title} into a single JAR at ${store.jar}"/>
         <jar destfile="${store.dir}/temp_final.jar" filesetmanifest="skip">
             <zipgroupfileset dir="dist" includes="*.jar"/>
             <zipgroupfileset dir="dist/lib" includes="*.jar"/>
             <manifest>
+                <attribute name="Version" value="${version-number}" />           
+                <attribute name="Bundle-Name" value="${project.name}" />           
+                <attribute name="Bundle-Version" value="${major-version-number}" />
+                <attribute name="Bundle-Date" value="${NOW}" />
+                <!--<attribute name="Bundle-Revision" value="${svna.version}" />-->
+                <attribute name="Application-Title" value="${application.title}" />
+                <attribute name="Application-Vendor" value="${application.vendor}" />
+                <attribute name="Implementation-Version" value="${build.number}" />
+                <attribute name="Application-URL" value="https://www.example.com" />
+
                 <attribute name="Main-Class" value="${main.class}"/>
             </manifest>
         </jar>
@@ -120,10 +134,10 @@
         </zip>
         <delete file="${store.dir}/temp_final.jar"/>
         
-<!--        La directory di destinazione viene sempre cancellata per cui fino a questo punto ci son osolo i file
-        necessari a creare il singolo jar.
-        Ora posso creare una copia datata e versionata-->
+        <!--        La directory di destinazione viene sempre cancellata per cui fino a questo punto ci sono solo i file
+        necessari a creare il singolo jar. Ora posso creare una copia datata e versionata-->
+        <echo message="Generated version: ${major.version.number}.${minor.version.number}.${revision.version.number} (${version-number})"/>
         <echo message="Moving ${store.dir}/${store.jar.name}.jar in release jar file: ${dist.dir}/${application.title} ${version-number}_${NOW_FOR_FILE}.jar"/>
-        <move file="${store.dir}/${store.jar.name}.jar" tofile="${dist.dir}/${application.title} ${version-number}_${NOW_FOR_FILE}.jar" />
+        <move file="${store.dir}/${store.jar.name}.jar" tofile="${dist.dir}/${application.title} ${version-number} (${NOW_FOR_FILE}).jar" />
     </target>
 </project>

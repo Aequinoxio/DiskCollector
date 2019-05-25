@@ -83,27 +83,17 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
      */
     public MainFrame() throws IOException, IOException {
         initComponents();
-        // TEST
-//// Snippet 02: Get the Log Manager Instance 
-//        LogManager lgMan = LogManager.getLogManager();
-//
-////Snippet 03: Get Logger from Log Manager
-//        String LoggerName = Logger.GLOBAL_LOGGER_NAME;
-//        Logger Logr = lgMan.getLogger(LoggerName);
-//
-////Snippet 04: Set the Log Level @ Logger
-//        Logr.setLevel(Level.ALL);        
 
-        // aGGIUNGO UN FILEHANDLER
-        //fileHandler = new FileHandler(Constants.LOGFILENAME, 1048576, 5, true);
+        // Aggiungo un file handler al logger
         fileHandler = new FileHandler(Constants.LOGFILENAME, 10485760, 1, true);
         fileHandler.setFormatter(new SimpleFormatter());
-        LOG.addHandler(fileHandler);
-        LOG.log(Level.INFO, "Application started");
-//        Logr.addHandler(fileHandler);
-//        Logr.log(Level.INFO, "Log started");
+        
+        if (Constants.getInstance().isExceptionsLogged()) {
+            LOG.addHandler(fileHandler);
+        }
 
-        // TEST
+        LOG.log(Level.INFO, "Application started");
+
         if (Constants.getInstance().isDBEncrypted()) {
             m_msgStatusBarDB = "Il DB verrà salvato crittografato";
         } else {
@@ -119,24 +109,24 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         updateStatusBar(null);
 
         mnuEncryptDB.setSelected(Constants.getInstance().isDBEncrypted());
+        mnuLogTofile.setSelected(Constants.getInstance().isExceptionsLogged());
 
-        mnuEncryptDB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                if (mnuEncryptDB.isSelected()) {
-                    Constants.getInstance().setDBEncrypted(true);
-                } else {
-                    Constants.getInstance().setDBEncrypted(false);
-                }
-
-                m_msgStatusBarDB = Constants.getInstance().isDBEncrypted()
-                        ? "Il Database verrà cifrato al salvataggio"
-                        : "Il Database non verrà cifrato";
-
-                updateStatusBar(null);
-            }
-        });
-
+//        mnuEncryptDB.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                if (mnuEncryptDB.isSelected()) {
+//                    Constants.getInstance().setDBEncrypted(true);
+//                } else {
+//                    Constants.getInstance().setDBEncrypted(false);
+//                }
+//
+//                m_msgStatusBarDB = Constants.getInstance().isDBEncrypted()
+//                        ? "Il Database verrà cifrato al salvataggio"
+//                        : "Il Database non verrà cifrato";
+//
+//                updateStatusBar(null);
+//            }
+//        });
         //UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
         // Inizializzo il tree
         DefaultMutableTreeNode topNode = new DefaultMutableTreeNode(new NodeInformation(Constants.ROOT_STRING, NodeType.ROOT));
@@ -189,7 +179,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         mnuLoadDB = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mnuSetPassword = new javax.swing.JMenuItem();
-        mnuKeyLength = new javax.swing.JMenuItem();
         mnuEncryptDB = new javax.swing.JCheckBoxMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         mnuExit = new javax.swing.JMenuItem();
@@ -202,11 +191,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         mnuDeleteTree = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mnuDeleteAll = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mnuTools = new javax.swing.JMenu();
         mnuLogTofile = new javax.swing.JCheckBoxMenuItem();
         mnuViewLogFile = new javax.swing.JMenuItem();
+        jSeparator7 = new javax.swing.JPopupMenu.Separator();
+        mnuKeyLength = new javax.swing.JMenuItem();
         mnuAbout = new javax.swing.JMenu();
-        mitmAbout = new javax.swing.JMenuItem();
+        mnuAboutItem = new javax.swing.JMenuItem();
 
         popMnuRename.setText("Rinomina e aggiorna");
         popMnuRename.addActionListener(new java.awt.event.ActionListener() {
@@ -227,6 +218,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnDeleteNodeTree.setText("Cancella ramo");
+        btnDeleteNodeTree.setToolTipText("Cancella il ramo selezionato");
         btnDeleteNodeTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDeleteNodeTreeActionPerformed(evt);
@@ -234,6 +226,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnDeleteNodeTre.setText("Cancella Backup set");
+        btnDeleteNodeTre.setToolTipText("Cancella il backup set selezionato");
         btnDeleteNodeTre.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDeleteNodeTreActionPerformed(evt);
@@ -249,6 +242,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnSearch.setText("Cerca");
+        btnSearch.setToolTipText("Cerca la prima ocorrenza nel sottoramo");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
@@ -256,6 +250,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnViewLog.setText("Cancella tutto");
+        btnViewLog.setToolTipText("Cancella tutti i backup sets ed i sottorami");
         btnViewLog.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnViewLogActionPerformed(evt);
@@ -288,6 +283,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         jSplitPane1.setRightComponent(jScrollPane2);
 
         btnSaveTree.setText("Salva DB");
+        btnSaveTree.setToolTipText("Salva tutto il DB cifrandolo se è stato specificato");
         btnSaveTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveTreeActionPerformed(evt);
@@ -295,6 +291,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnLoadTree.setText("Carica DB");
+        btnLoadTree.setToolTipText("Carica il DB, se cifrato prova ad usare la password impostata");
         btnLoadTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLoadTreeActionPerformed(evt);
@@ -302,6 +299,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnNewBackup.setText("Nuovo Backup set");
+        btnNewBackup.setToolTipText("Inserisce un nuovo backup set");
         btnNewBackup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNewBackupActionPerformed(evt);
@@ -309,6 +307,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         });
 
         btnInsertNodeTree.setText("Inserisci ramo");
+        btnInsertNodeTree.setToolTipText("Inserisce un ramo nel backup set");
         btnInsertNodeTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnInsertNodeTreeActionPerformed(evt);
@@ -371,6 +370,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         );
 
         btnSearchAll.setText("Cerca tutto");
+        btnSearchAll.setToolTipText("Cerca in tutto il sottoramo");
         btnSearchAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchAllActionPerformed(evt);
@@ -410,14 +410,6 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         });
         mnuFile.add(mnuSetPassword);
-
-        mnuKeyLength.setText("Verifica max lunghezza chiave ammissibile");
-        mnuKeyLength.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuKeyLengthActionPerformed(evt);
-            }
-        });
-        mnuFile.add(mnuKeyLength);
 
         mnuEncryptDB.setSelected(true);
         mnuEncryptDB.setText("DB Cifrato");
@@ -490,7 +482,10 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         });
         mnuEdit.add(mnuDeleteAll);
-        mnuEdit.add(jSeparator1);
+
+        jMenuBar1.add(mnuEdit);
+
+        mnuTools.setText("Tools");
 
         mnuLogTofile.setSelected(true);
         mnuLogTofile.setText("Log eccezioni su file");
@@ -499,7 +494,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 mnuLogTofileActionPerformed(evt);
             }
         });
-        mnuEdit.add(mnuLogTofile);
+        mnuTools.add(mnuLogTofile);
 
         mnuViewLogFile.setText("Vedi log file");
         mnuViewLogFile.addActionListener(new java.awt.event.ActionListener() {
@@ -507,19 +502,28 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                 mnuViewLogFileActionPerformed(evt);
             }
         });
-        mnuEdit.add(mnuViewLogFile);
+        mnuTools.add(mnuViewLogFile);
+        mnuTools.add(jSeparator7);
 
-        jMenuBar1.add(mnuEdit);
+        mnuKeyLength.setText("Verifica max lunghezza chiave ammissibile");
+        mnuKeyLength.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuKeyLengthActionPerformed(evt);
+            }
+        });
+        mnuTools.add(mnuKeyLength);
+
+        jMenuBar1.add(mnuTools);
 
         mnuAbout.setText("About");
 
-        mitmAbout.setText("About");
-        mitmAbout.addActionListener(new java.awt.event.ActionListener() {
+        mnuAboutItem.setText("About");
+        mnuAboutItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mitmAboutActionPerformed(evt);
+                mnuAboutItemActionPerformed(evt);
             }
         });
-        mnuAbout.add(mitmAbout);
+        mnuAbout.add(mnuAboutItem);
 
         jMenuBar1.add(mnuAbout);
 
@@ -789,12 +793,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         }
     }//GEN-LAST:event_btnInsertNodeTreeActionPerformed
 
-    private void mitmAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitmAboutActionPerformed
+    private void mnuAboutItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAboutItemActionPerformed
 
         JDialog dialog = new DlgAbout(this, true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);        
         dialog.setVisible(true);
 
-    }//GEN-LAST:event_mitmAboutActionPerformed
+    }//GEN-LAST:event_mnuAboutItemActionPerformed
 
     private void mnuSaveDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSaveDBActionPerformed
         saveTheTree();
@@ -887,7 +892,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Scegliere un nodo di backup set", "Attenzione", JOptionPane.OK_OPTION);
+            JOptionPane.showMessageDialog(this, "Scegliere un nodo backup set", "Attenzione", JOptionPane.OK_OPTION);
         }
     }//GEN-LAST:event_popMnuRenameActionPerformed
 
@@ -915,16 +920,29 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             LOG.addHandler(fileHandler);
             LOG.log(Level.INFO, "Log avviato");
             fileHandler.flush();
-            JOptionPane.showMessageDialog(this, "Scrito i log sul file: " + Constants.LOGFILENAME, "Informazione", JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Scrivo i log sul file: \n" + Constants.LOGFILENAME+"\ncreato nella folder dove è stato lanciato il programma", "Informazione", JOptionPane.PLAIN_MESSAGE);
+            
         } else {
             LOG.log(Level.INFO, "Log fermato");
             fileHandler.flush();
             LOG.removeHandler(fileHandler);
+            JOptionPane.showMessageDialog(this, "Logging fermato.\nIl file: " + Constants.LOGFILENAME+"\ncreato nella folder dove è stato lanciato il programma contiene i log ad ora.", "Informazione", JOptionPane.PLAIN_MESSAGE);
         }
+        Constants.getInstance().setExceptionsLogged(mnuLogTofile.isSelected());
     }//GEN-LAST:event_mnuLogTofileActionPerformed
 
     private void mnuEncryptDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEncryptDBActionPerformed
-        // TODO add your handling code here:
+        if (mnuEncryptDB.isSelected()) {
+            Constants.getInstance().setDBEncrypted(true);
+        } else {
+            Constants.getInstance().setDBEncrypted(false);
+        }
+
+        m_msgStatusBarDB = Constants.getInstance().isDBEncrypted()
+                ? "Il Database verrà cifrato al salvataggio"
+                : "Il Database non verrà cifrato";
+
+        updateStatusBar(null);
     }//GEN-LAST:event_mnuEncryptDBActionPerformed
 
     private void mnuKeyLengthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuKeyLengthActionPerformed
@@ -966,7 +984,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private void mnuViewLogFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuViewLogFileActionPerformed
         BufferedReader breader = null;
         try {
-            JTextArea txtLogView = new JTextArea(50, 80);
+            JTextArea txtLogView = new JTextArea(Constants.LOGTEXTAREA_ROWS, Constants.LOGTEXTAREA_COLS);
             breader = new BufferedReader(new FileReader(Constants.LOGFILENAME));
             String linea;
             while ((linea = breader.readLine()) != null) {
@@ -1365,7 +1383,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 // Cerco dall'ultimo nodo selezionato
         Enumeration searchingNodes = null;
 
-        if (m_selectedNode == null) { // Se non selezioni nulla parto dalla root
+        if (m_selectedNode == null) { // Se non seleziono nulla parto dalla root
             searchingNodes = ((DefaultMutableTreeNode) directoryTree.getModel().getRoot()).depthFirstEnumeration();
         } else {
             searchingNodes = m_selectedNode.depthFirstEnumeration();
@@ -1539,17 +1557,17 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JPopupMenu.Separator jSeparator6;
+    private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JLabel lblDBSavedType;
     private javax.swing.JLabel lblPasswordSet;
     private javax.swing.JLabel lblStatusBar;
-    private javax.swing.JMenuItem mitmAbout;
     private javax.swing.JMenu mnuAbout;
+    private javax.swing.JMenuItem mnuAboutItem;
     private javax.swing.JMenuItem mnuDeleteAll;
     private javax.swing.JMenuItem mnuDeleteBackupset;
     private javax.swing.JMenuItem mnuDeleteTree;
@@ -1565,6 +1583,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private javax.swing.JMenuItem mnuNewBackupSet;
     private javax.swing.JMenuItem mnuSaveDB;
     private javax.swing.JMenuItem mnuSetPassword;
+    private javax.swing.JMenu mnuTools;
     private javax.swing.JMenuItem mnuViewLogFile;
     private javax.swing.JPanel pnlStatusBar;
     private javax.swing.JPopupMenu popMenu;
