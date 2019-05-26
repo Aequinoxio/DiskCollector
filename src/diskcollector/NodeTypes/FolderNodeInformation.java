@@ -6,12 +6,14 @@
 package diskcollector.NodeTypes;
 
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 /**
  *
  * @author utente
  */
 public class FolderNodeInformation extends FilesystemNodeInformation implements CollectionNodeInformation{
+    private static final Logger LOG = Logger.getLogger(FolderNodeInformation.class.getName());
 
     // Informazioni nel caso in cui l'oggetto del tree sia un folder
     private long subFirstFolders;           // Sub folders immediatamente collegate

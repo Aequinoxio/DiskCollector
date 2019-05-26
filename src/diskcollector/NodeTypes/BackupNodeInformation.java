@@ -6,12 +6,14 @@
 package diskcollector.NodeTypes;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Classe per identificare un nodo di Backup
  * @author utente
  */
 public class BackupNodeInformation extends NodeInformation implements CollectionNodeInformation {
+    private static final Logger LOG = Logger.getLogger(BackupNodeInformation.class.getName());
 
     private Date retrievingDate = null; // Data alla quale sono state recuperate le informazioni sul backup
     private String details;             // descrizione del backup

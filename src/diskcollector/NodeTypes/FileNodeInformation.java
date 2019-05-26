@@ -6,12 +6,14 @@
 package diskcollector.NodeTypes;
 
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 /**
  *
  * @author utente
  */
 public class FileNodeInformation extends FilesystemNodeInformation {
+    private static final Logger LOG = Logger.getLogger(FileNodeInformation.class.getName());
 
     // Informazioni nel caso in cui l'oggetto del tree sia un file
     private long size ;

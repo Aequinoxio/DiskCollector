@@ -7,12 +7,14 @@ package diskcollector.NodeTypes;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 /**
  * Nodo generico contenente informazioni di un oggetto del filesystem (folder o file)
  * @author utente
  */
 public class FilesystemNodeInformation extends NodeInformation {
+    private static final Logger LOG = Logger.getLogger(FilesystemNodeInformation.class.getName());
 
     // Informazioni nel caso in cui l'oggetto del tree sia un file o folder
     private String path;              // 

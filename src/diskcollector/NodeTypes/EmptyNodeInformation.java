@@ -5,11 +5,14 @@
  */
 package diskcollector.NodeTypes;
 
+import java.util.logging.Logger;
+
 /**
  * Clase generica per rappresentare un nodo senza un tipo particolare
  * @author utente
  */
 public class EmptyNodeInformation extends NodeInformation{
+    private static final Logger LOG = Logger.getLogger(EmptyNodeInformation.class.getName());
 
     /**
      * Costruttore di default

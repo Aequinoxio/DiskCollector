@@ -3,9 +3,9 @@ Ant-Version: Apache Ant 1.10.4
 Created-By: 1.8.0_121-b13 (Oracle Corporation)
 Bundle-Name: DiskCollector
 Bundle-Version: v1.1.2
-Bundle-Date: 2019-05-25 07:39:49 CEST
-Application-Title: DiskCollector
-Application-Vendor: utente
-Implementation-Version: 120
+Bundle-Date: 2019-05-26 08:38:32 CEST
+Application-Title: ${application.title}
+Application-Vendor: ${application.vendor}
+Implementation-Version: 126
 Application-URL: https://www.example.com
 

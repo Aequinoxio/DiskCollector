@@ -11,6 +11,7 @@ import diskcollector.NodeTypes.NodeType;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.RowFilter;
@@ -34,7 +35,7 @@ public class DlgSearchAllResults extends javax.swing.JDialog {
     DefaultTableModel m_TableModel;
     ArrayList<DefaultMutableTreeNode> m_treeNodes;
     JTree m_tree;   // Tree da aggiornare al doppio click su una cella
-    private TableRowSorter<TableModel> m_rowSorter;
+    private final TableRowSorter<TableModel> m_rowSorter;
 
     /**
      * Creates new form blgSearchAllResults
@@ -256,6 +257,10 @@ public class DlgSearchAllResults extends javax.swing.JDialog {
 
     }
 
+    /**
+     *
+     * @param searchValues
+     */
     public void setSearchResults(ArrayList<DefaultMutableTreeNode> searchValues) {
         int counter = 1;
         int maxRows = searchValues.size();
@@ -332,4 +337,5 @@ public class DlgSearchAllResults extends javax.swing.JDialog {
     private javax.swing.JTable tblSearchResults;
     private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(DlgSearchAllResults.class.getName());
 }

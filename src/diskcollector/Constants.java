@@ -6,6 +6,7 @@
 package diskcollector;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 /**
@@ -25,6 +26,7 @@ public class Constants {
     private static final String DBENCRYPTEDKEY = "DBENCRYPTED";
     private static final String EXCEPTIONSLOGGEDKEY = "EXCEPTIONSLOGGED";
     private static final Preferences PREFS = Preferences.userNodeForPackage(Constants.class);
+    private static final Logger LOG = Logger.getLogger(Constants.class.getName());
 
     /**
      * Istanza del Singleton
@@ -51,6 +53,11 @@ public class Constants {
     }
 
 // TODO: Molto brutto, usare uno storage sicuro per non mostrarla in memoria in chiaro
+
+    /**
+     *
+     * @return
+     */
     public char[] getUserPassword() {
         if (userPassword != null) {
             return Arrays.copyOf(userPassword, userPassword.length);
@@ -60,6 +67,11 @@ public class Constants {
     }
 
 // TODO: Molto brutto, usare uno storage sicuro per non mostrarla in memoria in chiaro
+
+    /**
+     *
+     * @param userPassword
+     */
     public void setUserPassword(char[] userPassword) {
         if (userPassword != null) {
             this.userPassword = Arrays.copyOf(userPassword, userPassword.length);
@@ -108,10 +120,18 @@ public class Constants {
         PREFS.putBoolean(EXCEPTIONSLOGGEDKEY, ExceptionsLogged);
     }
 
+    /**
+     *
+     * @return
+     */
     public byte[] getSalt() {
         return Arrays.copyOf(salt, salt.length);
     }
 
+    /**
+     *
+     * @return
+     */
     public byte[] getIV() {
         return Arrays.copyOf(IV, IV.length);
     }

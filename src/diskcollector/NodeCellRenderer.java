@@ -7,6 +7,7 @@ package diskcollector;
 
 import diskcollector.NodeTypes.NodeInformation;
 import java.awt.Component;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,6 +25,7 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     private static final String SPAN_FORMAT_FOLDER = "<span style='color:%s;'><b>%s</b></span>";
     private static final String SPAN_FORMAT_BACKUP = "<span style='color:%s;'><font size=+1><i>%s</i></font></span>";
     private static final String SPAN_FORMAT_ROOT = "<span style='color:%s;'><font size=+1><i>%s</i></font></span>";
+    private static final Logger LOG = Logger.getLogger(NodeCellRenderer.class.getName());
 
     private final ImageIcon mainIcon;
     private final ImageIcon backupTextIcon;

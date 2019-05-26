@@ -1,2 +1,3 @@
 /dist/
 /DiskCollector_logger.log
+/DiskCollector_logger.log.lck

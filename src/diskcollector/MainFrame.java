@@ -1,5 +1,6 @@
 package diskcollector;
 
+import SimpleAESEncryptionLib.*;
 import diskcollector.NodeTypes.BackupNodeInformation;
 import diskcollector.NodeTypes.CollectionNodeInformation;
 import diskcollector.NodeTypes.FileNodeInformation;
@@ -16,9 +17,10 @@ import diskcollector.Worker.FilesystemActionWorker;
 import diskcollector.Worker.FolderTreeReaderWorker;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +32,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -52,15 +54,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import SimpleAESEncryptionLib.*;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
-import javax.swing.JFrame;
-
 /**
  *
  * @author utente
@@ -70,8 +63,9 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     DefaultMutableTreeNode m_selectedNode; // Nodo selezionato nel jtree
     private Enumeration m_searchingNodes;  // Enumeration per la ricerca, viene messo a null ogni volta che c'è una modifica sui dati dell'albero
     //private final String latestDBSaveParh = "";
+    private static final Logger LOG = Logger.getLogger(MainFrame.class.getName());
 
-    private final Handler fileHandler;
+    private Handler fileHandler = null;
 
     private String m_msgStatusBarDB;
     private String m_msgStatusBarUserPassword;
@@ -79,17 +73,28 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     /**
      * Creates new form MainFrame
      *
-     * @throws java.io.IOException
      */
-    public MainFrame() throws IOException, IOException {
+    public MainFrame() {
         initComponents();
 
         // Aggiungo un file handler al logger
-        fileHandler = new FileHandler(Constants.LOGFILENAME, 10485760, 1, true);
-        fileHandler.setFormatter(new SimpleFormatter());
-        
-        if (Constants.getInstance().isExceptionsLogged()) {
-            LOG.addHandler(fileHandler);
+        // Check per eventuali problemi      
+        try {
+            fileHandler = new FileHandler(Constants.LOGFILENAME, 10485760, 1, true);
+            fileHandler.setFormatter(new SimpleFormatter());
+
+            if (Constants.getInstance().isExceptionsLogged()) {
+                LOG.addHandler(fileHandler);
+            }
+            
+        } catch (IOException ex) {
+            showCustomLogDialog("Problema con la creazione del log file: " + Constants.LOGFILENAME,"Eccezione:", ex.toString());           
+            LOG.log(Level.SEVERE, null, ex);
+            
+        } catch (SecurityException ex) {
+            showCustomLogDialog("Problema con la creazione del log file: " + Constants.LOGFILENAME,"Eccezione:", ex.toString());            
+            LOG.log(Level.SEVERE, null, ex);
+            
         }
 
         LOG.log(Level.INFO, "Application started");
@@ -796,7 +801,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private void mnuAboutItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAboutItemActionPerformed
 
         JDialog dialog = new DlgAbout(this, true);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);        
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setVisible(true);
 
     }//GEN-LAST:event_mnuAboutItemActionPerformed
@@ -909,10 +914,16 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         // TODO add your handling code here:
     }//GEN-LAST:event_ckbUppercaseOnlyActionPerformed
 
+    private void cleanupOnExit() {
+        if (fileHandler != null) {
+            fileHandler.flush();
+            fileHandler.close();
+        }
+    }
+
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         LOG.log(Level.INFO, "Application ended");
-        fileHandler.flush();
-        fileHandler.close();
+        cleanupOnExit();
     }//GEN-LAST:event_formWindowClosing
 
     private void mnuLogTofileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLogTofileActionPerformed
@@ -920,13 +931,13 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             LOG.addHandler(fileHandler);
             LOG.log(Level.INFO, "Log avviato");
             fileHandler.flush();
-            JOptionPane.showMessageDialog(this, "Scrivo i log sul file: \n" + Constants.LOGFILENAME+"\ncreato nella folder dove è stato lanciato il programma", "Informazione", JOptionPane.PLAIN_MESSAGE);
-            
+            JOptionPane.showMessageDialog(this, "Scrivo i log sul file: \n" + Constants.LOGFILENAME + "\ncreato nella folder dove è stato lanciato il programma", "Informazione", JOptionPane.PLAIN_MESSAGE);
+
         } else {
             LOG.log(Level.INFO, "Log fermato");
             fileHandler.flush();
             LOG.removeHandler(fileHandler);
-            JOptionPane.showMessageDialog(this, "Logging fermato.\nIl file: " + Constants.LOGFILENAME+"\ncreato nella folder dove è stato lanciato il programma contiene i log ad ora.", "Informazione", JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Logging fermato.\nIl file: " + Constants.LOGFILENAME + "\ncreato nella folder dove è stato lanciato il programma contiene i log ad ora.", "Informazione", JOptionPane.PLAIN_MESSAGE);
         }
         Constants.getInstance().setExceptionsLogged(mnuLogTofile.isSelected());
     }//GEN-LAST:event_mnuLogTofileActionPerformed
@@ -969,10 +980,10 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
 //        }
 
 // Faccio le stesse operazioni dell'evento associato a windowsclosing
-// TODO: Dovrebbe essere possibile gestirlo in modounitario. DA FARE
+// TODO: Dovrebbe essere possibile gestirlo in modo unitario. DA FARE
         LOG.log(Level.INFO, "Application ended");
-        fileHandler.flush();
-        fileHandler.close();
+
+        cleanupOnExit();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(false);
@@ -984,28 +995,30 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private void mnuViewLogFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuViewLogFileActionPerformed
         BufferedReader breader = null;
         try {
-            JTextArea txtLogView = new JTextArea(Constants.LOGTEXTAREA_ROWS, Constants.LOGTEXTAREA_COLS);
+//            JTextArea txtLogView = new JTextArea(Constants.LOGTEXTAREA_ROWS, Constants.LOGTEXTAREA_COLS);
             breader = new BufferedReader(new FileReader(Constants.LOGFILENAME));
             String linea;
+            StringBuilder sb = new StringBuilder();
             while ((linea = breader.readLine()) != null) {
-                txtLogView.append(linea);
-                txtLogView.append("\n");
-            }   //JTextArea txtBackupSetDescription = new JTextArea(10, 50);
-
-            txtLogView.setEditable(false);
-            JScrollPane logScroll = new JScrollPane(txtLogView);
-            final JComponent[] array = new JComponent[]{
-                new JLabel("Contenuto log :"),
-                logScroll,};
-
-            String[] buttonMessages = new String[]{"Ok"};
-            JOptionPane.showOptionDialog(this, array, "Visualuzza file di log: " + Constants.LOGFILENAME,
-                    JOptionPane.OK_OPTION,
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    buttonMessages,
-                    buttonMessages[0]
-            );
+                sb.append(linea);
+                sb.append("\n");
+            }   
+            breader.close();
+            showCustomLogDialog("Visualuzza file di log: " + Constants.LOGFILENAME,"Contenuto log :", sb.toString());
+//            txtLogView.setEditable(false);
+//            JScrollPane logScroll = new JScrollPane(txtLogView);
+//            final JComponent[] array = new JComponent[]{
+//                new JLabel("Contenuto log :"),
+//                logScroll,};
+//
+//            String[] buttonMessages = new String[]{"Ok"};
+//            JOptionPane.showOptionDialog(this, array, "Visualuzza file di log: " + Constants.LOGFILENAME,
+//                    JOptionPane.OK_OPTION,
+//                    JOptionPane.PLAIN_MESSAGE,
+//                    null,
+//                    buttonMessages,
+//                    buttonMessages[0]
+//            );
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -1019,6 +1032,28 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
             }
         }
     }//GEN-LAST:event_mnuViewLogFileActionPerformed
+
+    private void showCustomLogDialog(String title, String labelValue, String txtAreaValue) {
+        JTextArea txtLogView = new JTextArea(Constants.LOGTEXTAREA_ROWS, Constants.LOGTEXTAREA_COLS);
+
+        txtLogView.setText(txtAreaValue);
+        
+        txtLogView.setEditable(false);
+        JScrollPane logScroll = new JScrollPane(txtLogView);
+        final JComponent[] array = new JComponent[]{
+            new JLabel(labelValue),
+            logScroll,};
+
+        String[] buttonMessages = new String[]{"Ok"};
+        JOptionPane.showOptionDialog(this, array, title,
+                JOptionPane.OK_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                buttonMessages,
+                buttonMessages[0]
+        );
+
+    }
 
     /**
      * Aggiorna la status bar
@@ -1227,12 +1262,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                try {
-                    new MainFrame().setVisible(true);
-                } catch (IOException ex) {
-                    //Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                    LOG.log(Level.SEVERE, null, ex);
-                }
+                new MainFrame().setVisible(true); //Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
     }
@@ -1293,7 +1323,7 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFirstSubFolders())).append(" subfolders in folder\n");
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFilesTotal())).append(" files totali sotto il folder \n");
                     sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getSizeTotal())).append(" file size totali nel folder\n");
-                    sb.append(String.valueOf(((FolderNodeInformation) nodeInfo).getFoldersTotal())).append(" folder totali nel folder\n");
+                    sb.append(String.valueOf(((CollectionNodeInformation) nodeInfo).getFoldersTotal())).append(" folder totali nel folder\n");
 
                     break;
                 case FILE: {
@@ -1591,6 +1621,5 @@ public class MainFrame extends javax.swing.JFrame implements TreeSelectionListen
     private javax.swing.JTextArea txtDetails;
     private javax.swing.JTextField txtSearchText;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(MainFrame.class.getName());
 
 }

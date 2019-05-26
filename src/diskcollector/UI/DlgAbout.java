@@ -173,4 +173,5 @@ public class DlgAbout extends javax.swing.JDialog {
     private javax.swing.JEditorPane epAbout;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(DlgAbout.class.getName());
 }

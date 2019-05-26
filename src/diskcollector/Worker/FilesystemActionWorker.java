@@ -33,6 +33,7 @@ import javax.swing.tree.TreeModel;
  * @author utente
  */
 public class FilesystemActionWorker extends SwingWorker<TreeModel, Void> {
+    private static final Logger LOG = Logger.getLogger(FilesystemActionWorker.class.getName());
 
     FilesystemWorkerErrorTypes m_error = FilesystemWorkerErrorTypes.OK;
 
@@ -237,6 +238,10 @@ public class FilesystemActionWorker extends SwingWorker<TreeModel, Void> {
         return (retval);
     }
 
+    /**
+     *
+     * @return
+     */
     public FilesystemWorkerErrorTypes getError() {
         return m_error;
     }

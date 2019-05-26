@@ -5,6 +5,7 @@
  */
 package diskcollector.UI;
 
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -25,6 +26,7 @@ import javax.swing.event.*;
  * listener each time the event is generated.
  */
 public class RequestFocusListener implements AncestorListener {
+    private static final Logger LOG = Logger.getLogger(RequestFocusListener.class.getName());
 
     private boolean removeListener;
 
@@ -48,7 +50,7 @@ public class RequestFocusListener implements AncestorListener {
     }
 
     /**
-     *
+     * 
      * @param e
      */
     @Override

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Stack;
+import java.util.logging.Logger;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -27,6 +28,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * @author utente
  */
 public class FolderTreeReaderWorker extends SwingWorker<DefaultMutableTreeNode, String> {
+    private static final Logger LOG = Logger.getLogger(FolderTreeReaderWorker.class.getName());
 
     Path path;
     DefaultMutableTreeNode topNode;

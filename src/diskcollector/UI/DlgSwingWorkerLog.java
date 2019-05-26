@@ -9,6 +9,7 @@ import diskcollector.Worker.FolderTreeReaderWorker;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
@@ -156,5 +157,6 @@ public class DlgSwingWorkerLog extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea txtLogWorker;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(DlgSwingWorkerLog.class.getName());
 
 }

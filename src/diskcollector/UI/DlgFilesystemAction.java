@@ -9,6 +9,7 @@ import diskcollector.Constants;
 import diskcollector.Worker.FilesystemActionWorker;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
@@ -189,4 +190,5 @@ public class DlgFilesystemAction extends javax.swing.JDialog {
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JLabel lblAction;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(DlgFilesystemAction.class.getName());
 }

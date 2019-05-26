@@ -6,11 +6,13 @@
 package diskcollector.NodeTypes;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 /**
  * 
  * @author utente
  */
 public class NodeInformation implements Serializable {
+    private static final Logger LOG = Logger.getLogger(NodeInformation.class.getName());
     private String displayString;   // Stringa da mostrare nel tree  
     private NodeType type;
 
